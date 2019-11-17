@@ -54,6 +54,7 @@
   </issueManagement>
 
   <modules>
+    <module>bw-util-config-http</module>
     <module>bw-util-dav</module>
     <module>bw-util-http</module>
     <module>bw-util-servlet</module>
