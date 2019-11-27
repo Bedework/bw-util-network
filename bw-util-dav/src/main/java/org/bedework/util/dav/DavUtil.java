@@ -38,12 +38,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -176,7 +178,7 @@ public class DavUtil implements Logged, Serializable {
    */
   public static class PropstatElement {
     /** */
-    public Collection<Element> props;
+    public List<Element> props;
 
     /** */
     public int status;
@@ -211,6 +213,11 @@ public class DavUtil implements Logged, Serializable {
 
     /** May be null */
     public String responseDescription;
+  }
+
+  public MultiStatusResponse getMultiStatusResponse(final String val) throws Throwable {
+    return getMultiStatusResponse(new ByteArrayInputStream(val.getBytes(
+            StandardCharsets.UTF_8)));
   }
 
   /**
