@@ -220,10 +220,15 @@ public class DavUtil implements Logged, Serializable {
             StandardCharsets.UTF_8)));
   }
 
+  public MultiStatusResponse getExtMkcolResponse(final String val) throws Throwable {
+    return getExtMkcolResponse(new ByteArrayInputStream(val.getBytes(
+            StandardCharsets.UTF_8)));
+  }
+
   /**
    * @param in input stream
    * @return Collection<DavChild>
-   * @throws Throwable
+   * @throws Throwable on fatal error
    */
   public MultiStatusResponse getMultiStatusResponse(final InputStream in) throws Throwable {
     MultiStatusResponse res = new MultiStatusResponse();
@@ -236,6 +241,30 @@ public class DavUtil implements Logged, Serializable {
 
     expect(root, WebdavTags.multistatus);
 
+    return getMsrEmcr(root, res);
+  }
+
+  /**
+   * @param in input stream
+   * @return Collection<DavChild>
+   * @throws Throwable on fatal error
+   */
+  public MultiStatusResponse getExtMkcolResponse(final InputStream in) throws Throwable {
+    MultiStatusResponse res = new MultiStatusResponse();
+
+    Document doc = parseContent(in);
+
+    Element root = doc.getDocumentElement();
+
+    /*    <!ELEMENT multistatus (response+, responsedescription?) > */
+
+    expect(root, WebdavTags.mkcolResponse);
+
+    return getMsrEmcr(root, res);
+  }
+
+  private MultiStatusResponse getMsrEmcr(final Element root,
+                                         final MultiStatusResponse res) throws Throwable {
     Collection<Element> responses = getChildren(root);
 
     int count = 0; // validity
