@@ -183,11 +183,15 @@ public class DavUtil implements Logged, Serializable {
     /** */
     public int status;
 
+    public Element error;
+
     /** May be null */
     public String responseDescription;
   }
 
-  /** partially parsed multi-status response element
+  /** partially parsed multi-status response element. If we have an
+   * href and status there will be no PropstatElements and the status
+   * is set. Otherwise the status is in the propstat.
    *
    * @author douglm
    */
@@ -195,8 +199,12 @@ public class DavUtil implements Logged, Serializable {
     /** */
     public String href;
 
+    public int status;
+
     /** */
     public List<PropstatElement> propstats = new ArrayList<>();
+
+    public Element error;
 
     /** May be null */
     public String responseDescription;
@@ -295,19 +303,54 @@ public class DavUtil implements Logged, Serializable {
 
       Iterator<Element> elit = getChildren(resp).iterator();
 
-      Node nd = elit.next();
+      Element nd = elit.next();
 
       if (!XmlUtil.nodeMatches(nd, WebdavTags.href)) {
         throw new Exception("Bad response. Expected href found " + nd);
       }
 
-      msre.href = getElementContent((Element)nd);
+      msre.href = getElementContent(nd);
+
+      boolean hadStatus = false;
 
       while (elit.hasNext()) {
         nd = elit.next();
 
+        if (XmlUtil.nodeMatches(nd, WebdavTags.status)) {
+          hadStatus = true;
+          if (!Util.isEmpty(msre.propstats)) {
+            throw new Exception(
+                    "Bad response. Expected propstat found " + nd);
+          }
+
+          msre.status = httpStatus(nd);
+          continue;
+        }
+
+        if (XmlUtil.nodeMatches(nd, WebdavTags.error)) {
+          if (msre.error != null) {
+            throw new Exception("Bad response. Multiple error elements");
+          }
+
+          msre.error = nd;
+          continue;
+        }
+
+        if (XmlUtil.nodeMatches(nd, WebdavTags.responseDescription)) {
+          if (msre.responseDescription != null) {
+            throw new Exception("Bad response. Multiple responseDescription elements");
+          }
+
+          msre.responseDescription = getElementContent(nd);
+          continue;
+        }
+
         if (!XmlUtil.nodeMatches(nd, WebdavTags.propstat)) {
           throw new Exception("Bad response. Expected propstat found " + nd);
+        }
+
+        if (hadStatus) {
+          throw new Exception("Bad response. Cannot have status and propstat");
         }
 
         /*    <!ELEMENT propstat (prop, status, responsedescription?) > */
