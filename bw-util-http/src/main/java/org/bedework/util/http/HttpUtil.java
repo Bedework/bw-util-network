@@ -302,6 +302,10 @@ public class HttpUtil implements Serializable {
       return new HttpPropfind(uri);
     }
 
+    if ("PROPPATCH".equals(nm)) {
+      return new HttpPropPatch(uri);
+    }
+
     if ("MKCALENDAR".equals(nm)) {
       return new HttpMkcalendar(uri);
     }
