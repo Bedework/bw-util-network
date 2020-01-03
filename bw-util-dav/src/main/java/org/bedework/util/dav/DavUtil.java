@@ -221,6 +221,9 @@ public class DavUtil implements Logged, Serializable {
 
     /** May be null */
     public String responseDescription;
+
+    /** May be null */
+    public String syncToken;
   }
 
   public MultiStatusResponse getMultiStatusResponse(final String val) throws Throwable {
@@ -280,19 +283,18 @@ public class DavUtil implements Logged, Serializable {
       count++;
 
       if (XmlUtil.nodeMatches(resp, WebdavTags.responseDescription)) {
-        // Has to be last
-        if (responses.size() > count) {
-          throw new Exception("Bad multstatus Expected " +
-              "(response+, responsedescription?)");
-        }
-
         res.responseDescription = getElementContent(resp);
         continue;
       }
 
+      if (XmlUtil.nodeMatches(resp, WebdavTags.syncToken)) {
+        res.syncToken = getElementContent(resp);
+        continue;
+      }
+
       if (!XmlUtil.nodeMatches(resp, WebdavTags.response)) {
-        throw new Exception("Bad multstatus Expected " +
-            "(response+, responsedescription?) found " + resp);
+        throw new Exception("Bad multistatus Expected " +
+            "(response+, responsedescription?, sync-token) found " + resp);
       }
 
       /*    <!ELEMENT response (href, ((href*, status)|(propstat+)),
