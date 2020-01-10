@@ -30,20 +30,22 @@ import org.bedework.util.xml.XmlUtil;
 import org.bedework.util.xml.tagdefs.WebdavTags;
 
 import org.apache.http.Header;
+import org.apache.http.HttpException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -226,12 +228,12 @@ public class DavUtil implements Logged, Serializable {
     public String syncToken;
   }
 
-  public MultiStatusResponse getMultiStatusResponse(final String val) throws Throwable {
+  public MultiStatusResponse getMultiStatusResponse(final String val) {
     return getMultiStatusResponse(new ByteArrayInputStream(val.getBytes(
             StandardCharsets.UTF_8)));
   }
 
-  public MultiStatusResponse getExtMkcolResponse(final String val) throws Throwable {
+  public MultiStatusResponse getExtMkcolResponse(final String val) {
     return getExtMkcolResponse(new ByteArrayInputStream(val.getBytes(
             StandardCharsets.UTF_8)));
   }
@@ -239,9 +241,8 @@ public class DavUtil implements Logged, Serializable {
   /**
    * @param in input stream
    * @return Collection<DavChild>
-   * @throws Throwable on fatal error
    */
-  public MultiStatusResponse getMultiStatusResponse(final InputStream in) throws Throwable {
+  public MultiStatusResponse getMultiStatusResponse(final InputStream in) {
     MultiStatusResponse res = new MultiStatusResponse();
 
     Document doc = parseContent(in);
@@ -258,9 +259,8 @@ public class DavUtil implements Logged, Serializable {
   /**
    * @param in input stream
    * @return Collection<DavChild>
-   * @throws Throwable on fatal error
    */
-  public MultiStatusResponse getExtMkcolResponse(final InputStream in) throws Throwable {
+  public MultiStatusResponse getExtMkcolResponse(final InputStream in) {
     MultiStatusResponse res = new MultiStatusResponse();
 
     Document doc = parseContent(in);
@@ -275,7 +275,7 @@ public class DavUtil implements Logged, Serializable {
   }
 
   private MultiStatusResponse getMsrEmcr(final Element root,
-                                         final MultiStatusResponse res) throws Throwable {
+                                         final MultiStatusResponse res) {
     Collection<Element> responses = getChildren(root);
 
     int count = 0; // validity
@@ -293,7 +293,7 @@ public class DavUtil implements Logged, Serializable {
       }
 
       if (!XmlUtil.nodeMatches(resp, WebdavTags.response)) {
-        throw new Exception("Bad multistatus Expected " +
+        throw new RuntimeException("Bad multistatus Expected " +
             "(response+, responsedescription?, sync-token) found " + resp);
       }
 
@@ -308,7 +308,7 @@ public class DavUtil implements Logged, Serializable {
       Element nd = elit.next();
 
       if (!XmlUtil.nodeMatches(nd, WebdavTags.href)) {
-        throw new Exception("Bad response. Expected href found " + nd);
+        throw new RuntimeException("Bad response. Expected href found " + nd);
       }
 
       msre.href = getElementContent(nd);
@@ -321,7 +321,7 @@ public class DavUtil implements Logged, Serializable {
         if (XmlUtil.nodeMatches(nd, WebdavTags.status)) {
           hadStatus = true;
           if (!Util.isEmpty(msre.propstats)) {
-            throw new Exception(
+            throw new RuntimeException(
                     "Bad response. Expected propstat found " + nd);
           }
 
@@ -331,7 +331,7 @@ public class DavUtil implements Logged, Serializable {
 
         if (XmlUtil.nodeMatches(nd, WebdavTags.error)) {
           if (msre.error != null) {
-            throw new Exception("Bad response. Multiple error elements");
+            throw new RuntimeException("Bad response. Multiple error elements");
           }
 
           msre.error = nd;
@@ -340,7 +340,7 @@ public class DavUtil implements Logged, Serializable {
 
         if (XmlUtil.nodeMatches(nd, WebdavTags.responseDescription)) {
           if (msre.responseDescription != null) {
-            throw new Exception("Bad response. Multiple responseDescription elements");
+            throw new RuntimeException("Bad response. Multiple responseDescription elements");
           }
 
           msre.responseDescription = getElementContent(nd);
@@ -348,11 +348,11 @@ public class DavUtil implements Logged, Serializable {
         }
 
         if (!XmlUtil.nodeMatches(nd, WebdavTags.propstat)) {
-          throw new Exception("Bad response. Expected propstat found " + nd);
+          throw new RuntimeException("Bad response. Expected propstat found " + nd);
         }
 
         if (hadStatus) {
-          throw new Exception("Bad response. Cannot have status and propstat");
+          throw new RuntimeException("Bad response. Cannot have status and propstat");
         }
 
         /*    <!ELEMENT propstat (prop, status, responsedescription?) > */
@@ -364,11 +364,11 @@ public class DavUtil implements Logged, Serializable {
         Node propnd = propstatit.next();
 
         if (!XmlUtil.nodeMatches(propnd, WebdavTags.prop)) {
-          throw new Exception("Bad response. Expected prop found " + propnd);
+          throw new RuntimeException("Bad response. Expected prop found " + propnd);
         }
 
         if (!propstatit.hasNext()) {
-          throw new Exception("Bad response. Expected propstat/status");
+          throw new RuntimeException("Bad response. Expected propstat/status");
         }
 
         pse.status = httpStatus(propstatit.next());
@@ -377,7 +377,7 @@ public class DavUtil implements Logged, Serializable {
           Node rdesc = propstatit.next();
 
           if (!XmlUtil.nodeMatches(rdesc, WebdavTags.responseDescription)) {
-            throw new Exception("Bad response, expected null or " +
+            throw new RuntimeException("Bad response, expected null or " +
                 "responsedescription. Found: " + rdesc);
           }
 
@@ -401,18 +401,18 @@ public class DavUtil implements Logged, Serializable {
    * @param syncToken from last report or null
    * @param props   null for a default set
    * @return Collection of DavChild or null for not found
-   * @throws Throwable
    */
   public Collection<DavChild> syncReport(final PooledHttpClient cl,
                                          final String path,
                                          final String syncToken,
-                                         final Collection<QName> props) throws Throwable {
-    final StringWriter sw = new StringWriter();
-    final XmlEmit xml = getXml();
+                                         final Collection<QName> props) {
+    try {
+      final StringWriter sw = new StringWriter();
+      final XmlEmit xml = getXml();
 
-    addNs(xml, WebdavTags.namespace);
+      addNs(xml, WebdavTags.namespace);
 
-    xml.startEmit(sw);
+      xml.startEmit(sw);
 
     /*
       <?xml version="1.0" encoding="utf-8" ?>
@@ -424,53 +424,57 @@ public class DavUtil implements Logged, Serializable {
         </D:prop>
       </D:sync-collection>
      */
-    xml.openTag(WebdavTags.syncCollection);
-    if (syncToken == null) {
-      xml.emptyTag(WebdavTags.syncToken);
-    } else {
-      xml.property(WebdavTags.syncToken, syncToken);
-    }
-    xml.property(WebdavTags.synclevel, "1");
-    xml.openTag(WebdavTags.prop);
-    xml.emptyTag(WebdavTags.getetag);
-
-    if (props != null) {
-      for (final QName pr: props) {
-        if (pr.equals(WebdavTags.getetag)) {
-          continue;
-        }
-
-        addNs(xml, pr.getNamespaceURI());
-        xml.emptyTag(pr);
+      xml.openTag(WebdavTags.syncCollection);
+      if (syncToken == null) {
+        xml.emptyTag(WebdavTags.syncToken);
+      } else {
+        xml.property(WebdavTags.syncToken, syncToken);
       }
+      xml.property(WebdavTags.synclevel, "1");
+      xml.openTag(WebdavTags.prop);
+      xml.emptyTag(WebdavTags.getetag);
+
+      if (props != null) {
+        for (final QName pr : props) {
+          if (pr.equals(WebdavTags.getetag)) {
+            continue;
+          }
+
+          addNs(xml, pr.getNamespaceURI());
+          xml.emptyTag(pr);
+        }
+      }
+
+      xml.closeTag(WebdavTags.prop);
+      xml.closeTag(WebdavTags.syncCollection);
+
+      final ResponseHolder<Collection<DavChild>> resp =
+              cl.report(path, "0", sw.toString(),
+                        this::processSyncResponse);
+
+      if (resp.failed) {
+        return null;
+      }
+
+      return resp.response;
+    } catch (final IOException | HttpException e) {
+      throw new RuntimeException(e);
     }
-
-    xml.closeTag(WebdavTags.prop);
-    xml.closeTag(WebdavTags.syncCollection);
-
-    final ResponseHolder resp = cl.report(path, "0", sw.toString(),
-                                          this::processSyncResponse);
-
-    if (resp.failed) {
-      return null;
-    }
-
-    return (Collection<DavChild>)resp.response;
   }
 
-  final ResponseHolder processSyncResponse(final String path,
-                                           CloseableHttpResponse resp) {
+  final ResponseHolder<Collection<DavChild>> processSyncResponse(final String path,
+                                                                 CloseableHttpResponse resp) {
     try {
       final int status = HttpUtil.getStatus(resp);
 
       if (status != SC_MULTI_STATUS) {
-        return new ResponseHolder(status,
-                                  "Failed response from server");
+        return new ResponseHolder<>(status,
+                                    "Failed response from server");
       }
 
       if (resp.getEntity() == null) {
-        return new ResponseHolder(status,
-                                  "No content in response from server");
+        return new ResponseHolder<>(status,
+                                    "No content in response from server");
       }
 
       final InputStream is = resp.getEntity().getContent();
@@ -483,9 +487,9 @@ public class DavUtil implements Logged, Serializable {
 
       expect(root, WebdavTags.multistatus);
 
-      return new ResponseHolder(processResponses(getChildren(root), null));
+      return new ResponseHolder<>(processResponses(getChildren(root), null));
     } catch (final Throwable t) {
-      return new ResponseHolder(t);
+      return new ResponseHolder<>(t);
     }
   }
 
@@ -495,11 +499,10 @@ public class DavUtil implements Logged, Serializable {
    * @param path of resource
    * @param props   null for a default set
    * @return DavChild or null for not found
-   * @throws Throwable
    */
   public DavChild getProps(final PooledHttpClient cl,
                            final String path,
-                           final Collection<QName> props) throws Throwable {
+                           final Collection<QName> props) {
     return makeDavChild(propfind(cl,
                                  normalizePath(path),
                                  props,
@@ -511,15 +514,20 @@ public class DavUtil implements Logged, Serializable {
    * @param parentPath the path - "" for empty path
    * @param props   null for a default set
    * @return Collection<DavChild> - empty for no children - null for path not found.
-   * @throws Throwable
    */
   public Collection<DavChild> getChildrenUrls(final PooledHttpClient cl,
                                               final String parentPath,
-                                              final Collection<QName> props) throws Throwable {
+                                              final Collection<QName> props) {
     final String path = normalizePath(parentPath);
 
-    return processResponses(propfind(cl, path, props, "1"),
-                            new URI(path));
+    final URI uri;
+    try {
+      uri = new URI(path);
+    } catch(final URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+
+    return processResponses(propfind(cl, path, props, "1"), uri);
   }
 
   /**
@@ -528,70 +536,74 @@ public class DavUtil implements Logged, Serializable {
    * @param props   null for a default set
    * @param depth to set depth of operation
    * @return List<Element> from multi-status response
-   * @throws Throwable
    */
   public List<Element> propfind(final PooledHttpClient cl,
                                 final String path,
                                 final Collection<QName> props,
-                                final String depth) throws Throwable {
-    final StringWriter sw = new StringWriter();
-    final XmlEmit xml = getXml();
+                                final String depth) {
+    try {
+      final StringWriter sw = new StringWriter();
+      final XmlEmit xml = getXml();
 
-    addNs(xml, WebdavTags.namespace);
+      addNs(xml, WebdavTags.namespace);
 
-    xml.startEmit(sw);
+      xml.startEmit(sw);
 
-    xml.openTag(WebdavTags.propfind);
-    xml.openTag(WebdavTags.prop);
-    xml.emptyTag(WebdavTags.displayname);
-    xml.emptyTag(WebdavTags.resourcetype);
+      xml.openTag(WebdavTags.propfind);
+      xml.openTag(WebdavTags.prop);
+      xml.emptyTag(WebdavTags.displayname);
+      xml.emptyTag(WebdavTags.resourcetype);
 
-    if (props != null) {
-      for (final QName pr: props) {
-        if (pr.equals(WebdavTags.displayname)) {
-          continue;
+      if (props != null) {
+        for (final QName pr : props) {
+          if (pr.equals(WebdavTags.displayname)) {
+            continue;
+          }
+
+          if (pr.equals(WebdavTags.resourcetype)) {
+            continue;
+          }
+
+          addNs(xml, pr.getNamespaceURI());
+          xml.emptyTag(pr);
         }
-
-        if (pr.equals(WebdavTags.resourcetype)) {
-          continue;
-        }
-
-        addNs(xml, pr.getNamespaceURI());
-        xml.emptyTag(pr);
-      }
-    }
-
-    xml.closeTag(WebdavTags.prop);
-    xml.closeTag(WebdavTags.propfind);
-
-    final ResponseHolder resp = cl.propfind(path,
-                                            depth,
-                                            sw.toString(),
-                                            this::processPropfindResponse);
-    if (resp.failed) {
-      if (debug()) {
-        debug("Failed: status = " + resp.status + " msg=" + resp.message);
       }
 
-      return null;
-    }
+      xml.closeTag(WebdavTags.prop);
+      xml.closeTag(WebdavTags.propfind);
 
-    return (List<Element>)resp.response;
+      final ResponseHolder<List<Element>> resp =
+              cl.propfind(path,
+                          depth,
+                          sw.toString(),
+                          this::processPropfindResponse);
+      if (resp.failed) {
+        if (debug()) {
+          debug("Failed: status = " + resp.status + " msg=" + resp.message);
+        }
+
+        return null;
+      }
+
+      return resp.response;
+    } catch (final IOException | HttpException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  final ResponseHolder processPropfindResponse(final String path,
-                                               final CloseableHttpResponse resp) {
+  final ResponseHolder<List<Element>> processPropfindResponse(final String path,
+                                                              final CloseableHttpResponse resp) {
     try {
       final int status = HttpUtil.getStatus(resp);
 
       if (status != SC_MULTI_STATUS) {
-        return new ResponseHolder(status,
-                                  "Failed response from server");
+        return new ResponseHolder<>(status,
+                                    "Failed response from server");
       }
 
       if (resp.getEntity() == null) {
-        return new ResponseHolder(status,
-                                  "No content in response from server");
+        return new ResponseHolder<>(status,
+                                    "No content in response from server");
       }
 
       final InputStream is = resp.getEntity().getContent();
@@ -604,9 +616,9 @@ public class DavUtil implements Logged, Serializable {
 
       expect(root, WebdavTags.multistatus);
 
-      return new ResponseHolder(getChildren(root));
+      return new ResponseHolder<>(getChildren(root));
     } catch (final Throwable t) {
-      return new ResponseHolder(t);
+      return new ResponseHolder<>(t);
     }
   }
 
@@ -614,7 +626,7 @@ public class DavUtil implements Logged, Serializable {
    *                   XmlUtil wrappers
    * ==================================================================== */
 
-  protected XmlEmit getXml() throws Throwable {
+  protected XmlEmit getXml() {
     final XmlEmit xml = new XmlEmit();
 
     for (final String ns: nameSpaces) {
@@ -627,13 +639,18 @@ public class DavUtil implements Logged, Serializable {
 
   /** Add a namespace
    *
-   * @param val
-   * @throws Throwable
+   * @param xml emit object
+   * @param val the namespace
+   * @throws RuntimeException on error
    */
   protected void addNs(final XmlEmit xml,
-                       final String val) throws Throwable {
+                       final String val) {
     if (xml.getNameSpace(val) == null) {
-      xml.addNs(new NameSpace(val, null), false);
+      try {
+        xml.addNs(new NameSpace(val, null), false);
+      } catch (final IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
 
@@ -641,15 +658,24 @@ public class DavUtil implements Logged, Serializable {
    *
    * @param in         content as stream
    * @return Document  Parsed body or null for no body
-   * @exception Throwable Some error occurred.
+   * @exception RuntimeException Some error occurred.
    */
-  protected Document parseContent(final InputStream in) throws Throwable {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setNamespaceAware(true);
+  protected Document parseContent(final InputStream in) {
+    try {
+      DocumentBuilderFactory factory = DocumentBuilderFactory
+              .newInstance();
+      factory.setNamespaceAware(true);
 
-    DocumentBuilder builder = factory.newDocumentBuilder();
+      DocumentBuilder builder = factory.newDocumentBuilder();
 
-    return builder.parse(new InputSource(new InputStreamReader(in)));
+      return builder
+              .parse(new InputSource(new InputStreamReader(in)));
+    } catch (final Throwable t) {
+      if (t instanceof RuntimeException) {
+        throw (RuntimeException)t;
+      }
+      throw new RuntimeException(t);
+    }
   }
 
   /** Parse a DAV error response
@@ -678,116 +704,73 @@ public class DavUtil implements Logged, Serializable {
   }
 
   /**
-   * @param nd
+   * @param nd the node
    * @return List<Element>
-   * @throws Throwable
    */
-  public static List<Element> getChildren(final Node nd) throws Throwable {
-    try {
-      return XmlUtil.getElements(nd);
-    } catch (final Throwable t) {
-      //if (debug) {
-      //  getLogger().error(this, t);
-      //}
-
-      throw new Exception(t.getMessage());
-    }
+  public static List<Element> getChildren(final Node nd) {
+    return XmlUtil.getElements(nd);
   }
 
   /**
-   * @param nd
+   * @param nd the node
    * @return Element[]
-   * @throws Throwable
    */
-  public static Element[] getChildrenArray(final Node nd) throws Throwable {
-    try {
-      return XmlUtil.getElementsArray(nd);
-    } catch (Throwable t) {
-      //if (debug) {
-      //  getLogger().error(this, t);
-      //}
-
-      throw new Exception(t.getMessage());
-    }
+  public static Element[] getChildrenArray(final Node nd) {
+    return XmlUtil.getElementsArray(nd);
   }
 
   /**
-   * @param nd
+   * @param nd the node
    * @return Element
-   * @throws Throwable
    */
-  public static Element getOnlyChild(final Node nd) throws Throwable {
-    try {
-      return XmlUtil.getOnlyElement(nd);
-    } catch (Throwable t) {
-      //if (debug) {
-      //  getLogger().error(this, t);
-      //}
-
-      throw new Exception(t.getMessage());
-    }
+  public static Element getOnlyChild(final Node nd) {
+    return XmlUtil.getOnlyElement(nd);
   }
 
   /**
-   * @param el
+   * @param el element
    * @return String
-   * @throws Throwable
+   * @throws RuntimeException on error
    */
-  public static String getElementContent(final Element el) throws Throwable {
-    try {
-      return XmlUtil.getElementContent(el);
-    } catch (Throwable t) {
-      //if (debug) {
-      //  getLogger().error(this, t);
-      //}
-
-      throw new Exception(t.getMessage());
-    }
+  public static String getElementContent(final Element el) {
+    return XmlUtil.getElementContent(el);
   }
 
   /**
-   * @param el
+   * @param el xml element
    * @return boolean
-   * @throws Throwable
+   * @throws RuntimeException on error
    */
-  public static boolean isEmpty(final Element el) throws Throwable {
-    try {
-      return XmlUtil.isEmpty(el);
-    } catch (Throwable t) {
-      //if (debug) {
-      //  getLogger().error(this, t);
-      //}
-
-      throw new Exception(t.getMessage());
-    }
+  public static boolean isEmpty(final Element el) {
+    return XmlUtil.isEmpty(el);
   }
 
   /**
-   * @param el
-   * @param tag
-   * @throws Throwable
+   * @param el xml element
+   * @param tag QName
+   * @throws RuntimeException on error
    */
   public static void expect(final Element el,
-                            final QName tag) throws Throwable {
+                            final QName tag) {
     if (!XmlUtil.nodeMatches(el, tag)) {
-      throw new Exception("Expected " + tag);
+      throw new RuntimeException("Expected " + tag);
     }
   }
 
   /**
    * @param el - must be status element
    * @return int status
-   * @throws Throwable
+   * @throws RuntimeException on bad status
    */
-  public static int httpStatus(final Element el) throws Throwable {
+  public static int httpStatus(final Element el) {
     if (!XmlUtil.nodeMatches(el, WebdavTags.status)) {
-      throw new Exception("Bad response. Expected status found " + el);
+      throw new RuntimeException("Bad response. Expected status found " + el);
     }
 
     final String s = getElementContent(el);
 
     if (s == null) {
-      throw new Exception("Bad http status. Found null");
+      throw new RuntimeException("Bad http status. Found null");
     }
 
     try {
@@ -795,12 +778,12 @@ public class DavUtil implements Logged, Serializable {
       final int end = s.indexOf(" ", start + 1);
 
       if (end < 0) {
-        return Integer.valueOf(s.substring(start));
+        return Integer.parseInt(s.substring(start + 1));
       }
 
-      return Integer.valueOf(s.substring(start + 1, end));
+      return Integer.parseInt(s.substring(start + 1, end));
     } catch (final Throwable t) {
-      throw new Exception("Bad http status. Found " + s);
+      throw new RuntimeException("Bad http status. Found " + s);
     }
   }
 
@@ -870,10 +853,9 @@ public class DavUtil implements Logged, Serializable {
    * @param responses   null for a default set
    * @param parentURI   null or uri of collection to excluse response
    * @return Collection<DavChild> - empty for no children - null for path not found.
-   * @throws Throwable
    */
   public Collection<DavChild> processResponses(final Collection<Element> responses,
-                                               final URI parentURI) throws Throwable {
+                                               final URI parentURI) {
     if (responses == null) {
       return null;
     }
@@ -887,7 +869,7 @@ public class DavUtil implements Logged, Serializable {
       if (XmlUtil.nodeMatches(resp, WebdavTags.responseDescription)) {
         // Has to be last
         if (responses.size() > count) {
-          throw new Exception("Bad multstatus Expected " +
+          throw new RuntimeException("Bad multstatus Expected " +
                                       "(response+, responsedescription?)");
         }
 
@@ -913,14 +895,19 @@ public class DavUtil implements Logged, Serializable {
       }
 
       if (!XmlUtil.nodeMatches(resp, WebdavTags.response)) {
-        throw new Exception("Bad multstatus Expected " +
+        throw new RuntimeException("Bad multstatus Expected " +
                                     "(response+, responsedescription?) found " + resp);
       }
 
       DavChild dc = makeDavResponse(resp);
 
       /* We get the collection back as well - check for it and skip it. */
-      URI childURI = new URI(dc.uri);
+      final URI childURI;
+      try {
+        childURI = new URI(dc.uri);
+      } catch (final URISyntaxException use) {
+        throw new RuntimeException(use);
+      }
 
       if ((parentURI != null) &&
               parentURI.getPath().equals(childURI.getPath())) {
@@ -937,9 +924,9 @@ public class DavUtil implements Logged, Serializable {
    *
    * @param responseElements   null for a default set
    * @return DavChild or null for not found
-   * @throws Throwable
+   * @throws RuntimeException on error
    */
-  private DavChild makeDavChild(final Collection<Element> responseElements) throws Throwable {
+  private DavChild makeDavChild(final Collection<Element> responseElements) {
     if (responseElements == null) {
       // status 400
       return null;
@@ -954,7 +941,7 @@ public class DavUtil implements Logged, Serializable {
       if (XmlUtil.nodeMatches(resp, WebdavTags.responseDescription)) {
         // Has to be last
         if (responseElements.size() > count) {
-          throw new Exception("Bad multstatus Expected " +
+          throw new RuntimeException("Bad multstatus Expected " +
                                       "(response+, responsedescription?)");
         }
 
@@ -962,12 +949,12 @@ public class DavUtil implements Logged, Serializable {
       }
 
       if (!XmlUtil.nodeMatches(resp, WebdavTags.response)) {
-        throw new Exception("Bad multstatus Expected " +
+        throw new RuntimeException("Bad multstatus Expected " +
                                     "(response+, responsedescription?) found " + resp);
       }
 
       if (dc != null){
-        throw new Exception("Bad multstatus Expected only 1 response");
+        throw new RuntimeException("Bad multstatus Expected only 1 response");
       }
 
       dc = makeDavResponse(resp);
@@ -976,35 +963,35 @@ public class DavUtil implements Logged, Serializable {
     return dc;
   }
 
-  private DavChild makeDavResponse(final Element resp) throws Throwable {
+  private DavChild makeDavResponse(final Element resp) {
     /*    <!ELEMENT response (href, ((href*, status)|(propstat+)),
           responsedescription?) >
      */
     final Iterator<Element> elit = getChildren(resp).iterator();
 
-    Node nd = elit.next();
+    Element nd = elit.next();
 
     final DavChild dc = new DavChild();
 
     if (!XmlUtil.nodeMatches(nd, WebdavTags.href)) {
-      throw new Exception("Bad response. Expected href found " + nd);
+      throw new RuntimeException("Bad response. Expected href found " + nd);
     }
 
-    dc.uri = URLDecoder.decode(getElementContent((Element)nd),
-                               HTTP.UTF_8); // href should be escaped
+    dc.uri = URLDecoder.decode(getElementContent(nd),
+                               StandardCharsets.UTF_8); // href should be escaped
 
     while (elit.hasNext()) {
       nd = elit.next();
 
       if (XmlUtil.nodeMatches(nd, WebdavTags.status)) {
-        dc.status = httpStatus((Element)nd);
+        dc.status = httpStatus(nd);
         continue;
       }
 
       dc.status = HttpServletResponse.SC_OK;
 
       if (!XmlUtil.nodeMatches(nd, WebdavTags.propstat)) {
-        throw new Exception("Bad response. Expected propstat found " + nd);
+        throw new RuntimeException("Bad response. Expected propstat found " + nd);
       }
 
       /*    <!ELEMENT propstat (prop, status, responsedescription?) > */
@@ -1013,11 +1000,11 @@ public class DavUtil implements Logged, Serializable {
       Node propnd = propstatit.next();
 
       if (!XmlUtil.nodeMatches(propnd, WebdavTags.prop)) {
-        throw new Exception("Bad response. Expected prop found " + propnd);
+        throw new RuntimeException("Bad response. Expected prop found " + propnd);
       }
 
       if (!propstatit.hasNext()) {
-        throw new Exception("Bad response. Expected propstat/status");
+        throw new RuntimeException("Bad response. Expected propstat/status");
       }
 
       final int st = httpStatus(propstatit.next());
@@ -1026,7 +1013,7 @@ public class DavUtil implements Logged, Serializable {
         Node rdesc = propstatit.next();
 
         if (!XmlUtil.nodeMatches(rdesc, WebdavTags.responseDescription)) {
-          throw new Exception("Bad response, expected null or " +
+          throw new RuntimeException("Bad response, expected null or " +
               "responsedescription. Found: " + rdesc);
         }
       }
