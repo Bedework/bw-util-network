@@ -106,15 +106,15 @@ public class PooledHttpClient {
   private final URI baseUri;
   private HeadersFetcher headersFetcher;
 
-  public interface ProcessResponse {
+  public interface ProcessResponse<T> {
     /**
      *
      * @param path from call
      * @param resp from request
      * @return http status code
      */
-    ResponseHolder process(String path,
-                           CloseableHttpResponse resp);
+    ResponseHolder<T> process(String path,
+                              CloseableHttpResponse resp);
   }
 
   public PooledHttpClient(final URI uri) {
@@ -395,6 +395,8 @@ public class PooledHttpClient {
 
     public String message;
 
+    public Throwable exception;
+
     public T response;
 
     /** Constructor for bad status
@@ -411,6 +413,11 @@ public class PooledHttpClient {
     public ResponseHolder(final T response) {
       this.response = response;
       failed = false;
+    }
+
+    public ResponseHolder(final Throwable exception) {
+      this.exception = exception;
+      failed = true;
     }
   }
 
