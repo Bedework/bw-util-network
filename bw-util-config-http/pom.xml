@@ -26,4 +26,22 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.bedework</groupId>
+        <artifactId>bw-util-maven-deploy-wfmodule</artifactId>
+
+        <configuration>
+          <moduleName>org.bedework.util.config-http</moduleName>
+
+          <moduleDependencies>
+            <dependency>org.bedework.util.dav</dependency>
+            <dependency>org.bedework.util.http</dependency>
+          </moduleDependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

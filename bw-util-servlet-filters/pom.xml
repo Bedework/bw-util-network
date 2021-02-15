@@ -32,4 +32,23 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.bedework</groupId>
+        <artifactId>bw-util-maven-deploy-wfmodule</artifactId>
+
+        <configuration>
+          <moduleName>org.bedework.util.servlet-filters</moduleName>
+
+          <moduleDependencies>
+            <dependency>javax.servlet.api</dependency>
+            <dependency>org.bedework.logging</dependency>
+            <dependency>org.bedework.util.servlet</dependency>
+          </moduleDependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

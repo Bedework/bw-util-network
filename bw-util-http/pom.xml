@@ -50,4 +50,54 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.bedework</groupId>
+        <artifactId>bw-util-maven-deploy-wfmodule</artifactId>
+
+        <configuration>
+          <moduleName>org.bedework.util.http</moduleName>
+
+          <jarDependencies>
+            <jarDependency>
+              <moduleName>org.bedework.org.apache.httpcomponents.httpcore</moduleName>
+              <groupId>org.apache.httpcomponents</groupId>
+              <artifactId>httpcore</artifactId>
+              <version>${http-core.version}</version>
+              <type>jar</type>
+            </jarDependency>
+
+            <jarDependency>
+              <moduleName>org.bedework.org.apache.httpcomponents.httpclient</moduleName>
+              <groupId>org.apache.httpcomponents</groupId>
+              <artifactId>httpclient</artifactId>
+              <version>${http-client.version}</version>
+              <type>jar</type>
+            </jarDependency>
+
+            <jarDependency>
+              <moduleName>org.bedework.com.fasterxml.jackson.core.databind</moduleName>
+              <groupId>com.fasterxml.jackson.core</groupId>
+              <artifactId>jackson-databind</artifactId>
+              <version>${jackson.version}</version>
+              <type>jar</type>
+              <moduleDependencies>
+                <dependency>
+                  com.fasterxml.jackson.core</dependency>
+              </moduleDependencies>
+            </jarDependency>
+          </jarDependencies>
+
+          <moduleDependencies>
+            <dependency>javax.servlet.api</dependency>
+            <dependency>org.bedework.logging</dependency>
+            <dependency>org.bedework.util.config</dependency>
+            <dependency>org.bedework.util.jmx</dependency>
+          </moduleDependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

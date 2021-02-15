@@ -4,8 +4,8 @@
 
   <parent>
     <groupId>org.bedework</groupId>
-        <artifactId>bw-util-network</artifactId>
-        <version>4.1.1-SNAPSHOT</version>
+    <artifactId>bw-util-network</artifactId>
+    <version>4.1.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>bw-util-servlet</artifactId>
@@ -45,4 +45,39 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.bedework</groupId>
+        <artifactId>bw-util-maven-deploy-wfmodule</artifactId>
+
+        <configuration>
+          <moduleName>org.bedework.util.servlet</moduleName>
+
+          <jarDependencies>
+            <jarDependency>
+              <moduleName>org.bedework.com.fasterxml.jackson.core.databind</moduleName>
+              <groupId>com.fasterxml.jackson.core</groupId>
+              <artifactId>jackson-databind</artifactId>
+              <version>${jackson.version}</version>
+              <type>jar</type>
+              <moduleDependencies>
+                <dependency>
+                  com.fasterxml.jackson.core</dependency>
+              </moduleDependencies>
+            </jarDependency>
+          </jarDependencies>
+
+          <moduleDependencies>
+            <dependency>javax.servlet.api</dependency>
+            <dependency>org.bedework.logging</dependency>
+            <dependency>org.bedework.util.config</dependency>
+            <dependency>org.bedework.util.jmx</dependency>
+            <dependency>org.bedework.util.misc</dependency>
+          </moduleDependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
