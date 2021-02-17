@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.bedework</groupId>
-        <artifactId>bw-util-network</artifactId>
-        <version>4.1.1-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>org.bedework</groupId>
+    <artifactId>bw-util-network</artifactId>
+    <version>4.1.1-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>bw-util-http</artifactId>
+  <artifactId>bw-util-http</artifactId>
 
   <packaging>jar</packaging>
 
@@ -84,17 +84,26 @@
               <version>${jackson.version}</version>
               <type>jar</type>
               <moduleDependencies>
-                <dependency>
-                  com.fasterxml.jackson.core</dependency>
+                <moduleDependency>
+                  <name>com.fasterxml.jackson.core.jackson-core</name>
+                </moduleDependency>
               </moduleDependencies>
             </jarDependency>
           </jarDependencies>
 
           <moduleDependencies>
-            <dependency>javax.servlet.api</dependency>
-            <dependency>org.bedework.logging</dependency>
-            <dependency>org.bedework.util.config</dependency>
-            <dependency>org.bedework.util.jmx</dependency>
+            <moduleDependency>
+              <name>javax.servlet.api</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.logging</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.config</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.jmx</name>
+            </moduleDependency>
           </moduleDependencies>
         </configuration>
       </plugin>

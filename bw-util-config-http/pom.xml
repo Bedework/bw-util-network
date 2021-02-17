@@ -37,8 +37,12 @@
           <moduleName>org.bedework.util.config-http</moduleName>
 
           <moduleDependencies>
-            <dependency>org.bedework.util.dav</dependency>
-            <dependency>org.bedework.util.http</dependency>
+            <moduleDependency>
+              <name>org.bedework.util.dav</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.http</name>
+            </moduleDependency>
           </moduleDependencies>
         </configuration>
       </plugin>

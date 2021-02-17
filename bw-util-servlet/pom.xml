@@ -63,18 +63,29 @@
               <version>${jackson.version}</version>
               <type>jar</type>
               <moduleDependencies>
-                <dependency>
-                  com.fasterxml.jackson.core</dependency>
+                <moduleDependency>
+                  <name>com.fasterxml.jackson.core.jackson-core</name>
+                </moduleDependency>
               </moduleDependencies>
             </jarDependency>
           </jarDependencies>
 
           <moduleDependencies>
-            <dependency>javax.servlet.api</dependency>
-            <dependency>org.bedework.logging</dependency>
-            <dependency>org.bedework.util.config</dependency>
-            <dependency>org.bedework.util.jmx</dependency>
-            <dependency>org.bedework.util.misc</dependency>
+            <moduleDependency>
+              <name>javax.servlet.api</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.logging</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.config</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.jmx</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.misc</name>
+            </moduleDependency>
           </moduleDependencies>
         </configuration>
       </plugin>

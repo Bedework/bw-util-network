@@ -47,10 +47,18 @@
           <moduleName>org.bedework.util.dav</moduleName>
 
           <moduleDependencies>
-            <dependency>javax.servlet.api</dependency>
-            <dependency>org.bedework.logging</dependency>
-            <dependency>org.bedework.util.http</dependency>
-            <dependency>org.bedework.util.xml</dependency>
+            <moduleDependency>
+              <name>javax.servlet.api</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.logging</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.http</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.xml</name>
+            </moduleDependency>
           </moduleDependencies>
         </configuration>
       </plugin>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.bedework</groupId>
-        <artifactId>bw-util-network</artifactId>
-        <version>4.1.1-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>org.bedework</groupId>
+    <artifactId>bw-util-network</artifactId>
+    <version>4.1.1-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>bw-util-servlet-filters</artifactId>
+  <artifactId>bw-util-servlet-filters</artifactId>
 
   <packaging>jar</packaging>
 
@@ -31,6 +31,11 @@
       <artifactId>javax.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>xml-apis</groupId>
+      <artifactId>xml-apis</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -42,10 +47,26 @@
         <configuration>
           <moduleName>org.bedework.util.servlet-filters</moduleName>
 
+          <jarDependencies>
+            <jarDependency>
+              <moduleName>org.bedework.xml-apis.xml-apis</moduleName>
+              <groupId>xml-apis</groupId>
+              <artifactId>xml-apis</artifactId>
+              <version>${xml-api.version}</version>
+              <type>jar</type>
+            </jarDependency>
+          </jarDependencies>
+
           <moduleDependencies>
-            <dependency>javax.servlet.api</dependency>
-            <dependency>org.bedework.logging</dependency>
-            <dependency>org.bedework.util.servlet</dependency>
+            <moduleDependency>
+              <name>javax.servlet.api</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.logging</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.servlet</name>
+            </moduleDependency>
           </moduleDependencies>
         </configuration>
       </plugin>

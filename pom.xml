@@ -28,6 +28,7 @@
     <jms.version>2.0</jms.version>
     <junit.version>4.13.1</junit.version>
     <servlet-api.version>4.0.0</servlet-api.version>
+    <xml-api.version>1.4.01</xml-api.version>
   </properties>
 
   <organization>
@@ -155,6 +156,12 @@
         <artifactId>javax.servlet-api</artifactId>
         <version>${servlet-api.version}</version>
         <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>xml-apis</groupId>
+        <artifactId>xml-apis</artifactId>
+        <version>${xml-api.version}</version>
       </dependency>
 
       <!-- Test Dependencies -->
