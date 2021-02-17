@@ -111,6 +111,9 @@
                 <moduleDependency>
                   <name>com.fasterxml.jackson.core.jackson-core</name>
                 </moduleDependency>
+                <moduleDependency>
+                  <name>org.bedework.com.fasterxml.jackson.core.annotations</name>
+                </moduleDependency>
               </moduleDependencies>
             </jarDependency>
           </jarDependencies>
