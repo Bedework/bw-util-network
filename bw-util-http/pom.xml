@@ -75,6 +75,30 @@
               <artifactId>httpclient</artifactId>
               <version>${http-client.version}</version>
               <type>jar</type>
+
+              <jarDependencies>
+                <jarDependency>
+                  <moduleName>org.bedework.commons-codec</moduleName>
+                  <groupId>commons-codec</groupId>
+                  <artifactId>commons-codec</artifactId>
+                  <version>${commons-codec.version}</version>
+                  <type>jar</type>
+                </jarDependency>
+
+                <jarDependency>
+                  <moduleName>org.bedework.commons-logging</moduleName>
+                  <groupId>commons-logging</groupId>
+                  <artifactId>commons-logging</artifactId>
+                  <version>${commons-logging.version}</version>
+                  <type>jar</type>
+                </jarDependency>
+              </jarDependencies>
+
+              <moduleDependencies>
+                <moduleDependency>
+                  <name>org.bedework.org.apache.httpcomponents.httpcore</name>
+                </moduleDependency>
+              </moduleDependencies>
             </jarDependency>
 
             <jarDependency>
