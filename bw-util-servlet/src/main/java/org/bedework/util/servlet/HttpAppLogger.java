@@ -117,7 +117,7 @@ public interface HttpAppLogger extends Logged {
   default  void logInfo(final HttpServletRequest request,
                         final String logname,
                         final String info) {
-    LogEntry le = getLogEntry(request, logname);
+    final LogEntry le = getLogEntry(request, logname);
 
     le.append(info);
 
@@ -128,16 +128,14 @@ public interface HttpAppLogger extends Logged {
    *  distinguish applications.
    *
    * @param request    HttpServletRequest
-   * @throws Throwable on error
    */
-  default void logRequest(final HttpServletRequest request)
-          throws Throwable {
-    LogEntry le = getLogEntry(request, "REQUEST");
+  default void logRequest(final HttpServletRequest request) {
+    final LogEntry le = getLogEntry(request, "REQUEST");
 
     le.append(request.getRemoteAddr());
     le.append(HttpServletUtils.getUrl(request));
 
-    String q = request.getQueryString();
+    final String q = request.getQueryString();
 
     if (q != null) {
       le.concat("?");
@@ -153,16 +151,14 @@ public interface HttpAppLogger extends Logged {
   /** Log the request on the way out.
    *
    * @param request    HttpServletRequest
-   * @throws Throwable on error
    */
-  default void logRequestOut(final HttpServletRequest request)
-          throws Throwable {
-    LogEntry le = getLogEntry(request, "REQUEST-OUT");
+  default void logRequestOut(final HttpServletRequest request) {
+    final LogEntry le = getLogEntry(request, "REQUEST-OUT");
 
     le.append(request.getRemoteAddr());
     le.append(HttpServletUtils.getUrl(request));
 
-    String q = request.getQueryString();
+    final String q = request.getQueryString();
 
     if (q != null) {
       le.concat("?");
@@ -186,7 +182,7 @@ public interface HttpAppLogger extends Logged {
                                 final boolean start,
                                 final long sessionNum,
                                 final long sessions) {
-    LogEntry le;
+    final LogEntry le;
 
     if (start) {
       le = getLogEntry(request, "SESSION-START");
@@ -214,14 +210,14 @@ public interface HttpAppLogger extends Logged {
    */
   default String getSessionId(final HttpServletRequest request) {
     try {
-      HttpSession sess = request.getSession(false);
+      final HttpSession sess = request.getSession(false);
 
       if (sess == null) {
         return "NO-SESSIONID";
       } else {
         return sess.getId();
       }
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       error(t);
       return "SESSION-ID-EXCEPTION";
     }
@@ -229,7 +225,7 @@ public interface HttpAppLogger extends Logged {
 
   /** Emit the log entry
    */
-  default void emitLogEntry(LogEntry entry) {
+  default void emitLogEntry(final LogEntry entry) {
     info(entry.toString());
   }
 }
