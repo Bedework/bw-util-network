@@ -21,7 +21,6 @@
     <bw-util-deploy.version>4.0.28-SNAPSHOT</bw-util-deploy.version>
 
     <!-- Third Party Library Versions -->
-    <commons-codec.version>1.15</commons-codec.version>
     <commons-logging.version>1.2</commons-logging.version>
     <http-client.version>4.5.13</http-client.version>
     <http-core.version>4.4.14</http-core.version>

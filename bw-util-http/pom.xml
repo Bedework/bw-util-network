@@ -78,14 +78,6 @@
 
               <jarDependencies>
                 <jarDependency>
-                  <moduleName>org.bedework.commons-codec</moduleName>
-                  <groupId>commons-codec</groupId>
-                  <artifactId>commons-codec</artifactId>
-                  <version>${commons-codec.version}</version>
-                  <type>jar</type>
-                </jarDependency>
-
-                <jarDependency>
                   <moduleName>org.bedework.commons-logging</moduleName>
                   <groupId>commons-logging</groupId>
                   <artifactId>commons-logging</artifactId>
