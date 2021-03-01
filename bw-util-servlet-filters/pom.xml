@@ -32,10 +32,30 @@
       <scope>provided</scope>
     </dependency>
 
+    <!--
     <dependency>
       <groupId>xml-apis</groupId>
       <artifactId>xml-apis</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>xalan</groupId>
+      <artifactId>xalan</artifactId>
+      <version>2.7.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>xalan</groupId>
+      <artifactId>serializer</artifactId>
+      <version>2.7.1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    -->
   </dependencies>
 
   <build>
@@ -47,15 +67,33 @@
         <configuration>
           <moduleName>org.bedework.util.servlet-filters</moduleName>
 
-          <jarDependencies>
-            <jarDependency>
-              <moduleName>org.bedework.xml-apis.xml-apis</moduleName>
+          <jarResources>
+            <!--
+            <jarResource>
+              <groupId>xalan</groupId>
+              <artifactId>xalan</artifactId>
+              <version>2.7.1</version>
+            </jarResource>
+
+            <jarResource>
+              <groupId>xalan</groupId>
+              <artifactId>serializer</artifactId>
+              <version>2.7.1</version>
+            </jarResource>
+
+            <jarResource>
+              <groupId>xerces</groupId>
+              <artifactId>xercesImpl</artifactId>
+              <version>2.10.0</version>
+            </jarResource>
+
+            <jarResource>
               <groupId>xml-apis</groupId>
               <artifactId>xml-apis</artifactId>
               <version>${xml-api.version}</version>
-              <type>jar</type>
-            </jarDependency>
-          </jarDependencies>
+            </jarResource>
+            -->
+          </jarResources>
 
           <moduleDependencies>
             <moduleDependency>
