@@ -62,38 +62,6 @@
 
           <jarDependencies>
             <jarDependency>
-              <moduleName>org.bedework.org.apache.httpcomponents.httpcore</moduleName>
-              <groupId>org.apache.httpcomponents</groupId>
-              <artifactId>httpcore</artifactId>
-              <version>${http-core.version}</version>
-              <type>jar</type>
-            </jarDependency>
-
-            <jarDependency>
-              <moduleName>org.bedework.org.apache.httpcomponents.httpclient</moduleName>
-              <groupId>org.apache.httpcomponents</groupId>
-              <artifactId>httpclient</artifactId>
-              <version>${http-client.version}</version>
-              <type>jar</type>
-
-              <jarDependencies>
-                <jarDependency>
-                  <moduleName>org.bedework.commons-logging</moduleName>
-                  <groupId>commons-logging</groupId>
-                  <artifactId>commons-logging</artifactId>
-                  <version>${commons-logging.version}</version>
-                  <type>jar</type>
-                </jarDependency>
-              </jarDependencies>
-
-              <moduleDependencies>
-                <moduleDependency>
-                  <name>org.bedework.org.apache.httpcomponents.httpcore</name>
-                </moduleDependency>
-              </moduleDependencies>
-            </jarDependency>
-
-            <jarDependency>
               <moduleName>org.bedework.com.fasterxml.jackson.core.databind</moduleName>
               <groupId>com.fasterxml.jackson.core</groupId>
               <artifactId>jackson-databind</artifactId>
@@ -114,14 +82,21 @@
             <moduleDependency>
               <name>javax.servlet.api</name>
             </moduleDependency>
+
             <moduleDependency>
               <name>org.bedework.logging</name>
             </moduleDependency>
+
             <moduleDependency>
               <name>org.bedework.util.config</name>
             </moduleDependency>
+
             <moduleDependency>
               <name>org.bedework.util.jmx</name>
+            </moduleDependency>
+
+            <moduleDependency>
+              <name>org.bedework.org.apache.httpcomponents.httpclient</name>
             </moduleDependency>
           </moduleDependencies>
         </configuration>

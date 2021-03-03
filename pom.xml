@@ -63,6 +63,7 @@
     <module>bw-util-http</module>
     <module>bw-util-servlet</module>
     <module>bw-util-servlet-filters</module>
+    <module>bw-util-httpmodule</module>
   </modules>
 
   <developers>

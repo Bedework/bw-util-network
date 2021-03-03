@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>bw-util-network</artifactId>
+    <groupId>org.bedework</groupId>
+    <version>4.1.1-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>bw-util-httpmodule</artifactId>
+  <packaging>pom</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.bedework</groupId>
+        <artifactId>bw-util-maven-deploy-wfmodule</artifactId>
+
+        <configuration>
+          <moduleName>org.bedework.org.apache.httpcomponents.httpclient</moduleName>
+          <noArtifact>true</noArtifact>
+
+          <jarResources>
+            <jarResource>
+              <groupId>org.apache.httpcomponents</groupId>
+              <artifactId>httpclient</artifactId>
+              <version>${http-client.version}</version>
+            </jarResource>
+          </jarResources>
+
+          <jarDependencies>
+            <jarDependency>
+              <moduleName>org.bedework.org.apache.httpcomponents.httpcore</moduleName>
+              <groupId>org.apache.httpcomponents</groupId>
+              <artifactId>httpcore</artifactId>
+              <version>${http-core.version}</version>
+              <type>jar</type>
+            </jarDependency>
+
+            <jarDependency>
+              <moduleName>org.bedework.commons-logging</moduleName>
+              <groupId>commons-logging</groupId>
+              <artifactId>commons-logging</artifactId>
+              <version>${commons-logging.version}</version>
+              <type>jar</type>
+            </jarDependency>
+          </jarDependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+
+  </build>
+</project>
