@@ -118,9 +118,8 @@ public class ReqUtil implements Serializable {
    *
    * @param name    name of parameter
    * @return  boolean true for present and not null
-   * @throws Throwable
    */
-  public boolean notNull(final String name) throws Throwable {
+  public boolean notNull(final String name) {
     return getReqPar(name) != null;
   }
 
@@ -129,10 +128,9 @@ public class ReqUtil implements Serializable {
    *
    * @param name    name of parameter
    * @return  List<String> or null
-   * @throws Throwable
    */
-  public List<String> getReqPars(final String name) throws Throwable {
-    String[] s = request.getParameterValues(name);
+  public List<String> getReqPars(final String name) {
+    final String[] s = request.getParameterValues(name);
     ArrayList<String> res = null;
 
     if ((s == null) || (s.length == 0)) {
@@ -157,10 +155,9 @@ public class ReqUtil implements Serializable {
    *
    * @param name    name of parameter
    * @return  Integer   value or null
-   * @throws Throwable
    */
-  public Integer getIntReqPar(final String name) throws Throwable {
-    String reqpar = getReqPar(name);
+  public Integer getIntReqPar(final String name) {
+    final String reqpar = getReqPar(name);
 
     if (reqpar == null) {
       return null;
@@ -172,13 +169,12 @@ public class ReqUtil implements Serializable {
   /** Get an integer valued request parameter.
    *
    * @param name    name of parameter
-   * @param defaultVal
+   * @param defaultVal default to return if missing or invalid
    * @return  int   value
-   * @throws Throwable
    */
   public int getIntReqPar(final String name,
-                          final int defaultVal) throws Throwable {
-    String reqpar = getReqPar(name);
+                          final int defaultVal) {
+    final String reqpar = getReqPar(name);
 
     if (reqpar == null) {
       return defaultVal;
@@ -186,7 +182,7 @@ public class ReqUtil implements Serializable {
 
     try {
       return Integer.parseInt(reqpar);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       return defaultVal; // XXX exception?
     }
   }
@@ -195,10 +191,9 @@ public class ReqUtil implements Serializable {
    *
    * @param name    name of parameter
    * @return  Long   value or null
-   * @throws Throwable
    */
-  public Long getLongReqPar(final String name) throws Throwable {
-    String reqpar = getReqPar(name);
+  public Long getLongReqPar(final String name) {
+    final String reqpar = getReqPar(name);
 
     if (reqpar == null) {
       return null;
@@ -210,13 +205,12 @@ public class ReqUtil implements Serializable {
   /** Get an long valued request parameter.
    *
    * @param name    name of parameter
-   * @param defaultVal
+   * @param defaultVal default to return if missing or invalid
    * @return  long  value
-   * @throws Throwable
    */
   public long getLongReqPar(final String name,
-                            final long defaultVal) throws Throwable {
-    String reqpar = getReqPar(name);
+                            final long defaultVal) {
+    final String reqpar = getReqPar(name);
 
     if (reqpar == null) {
       return defaultVal;
@@ -224,7 +218,7 @@ public class ReqUtil implements Serializable {
 
     try {
       return Long.parseLong(reqpar);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       return defaultVal; // XXX exception?
     }
   }
@@ -233,9 +227,8 @@ public class ReqUtil implements Serializable {
    *
    * @param name    name of parameter
    * @return  Boolean   value or null for absent parameter
-   * @throws Throwable
    */
-  public Boolean getBooleanReqPar(final String name) throws Throwable {
+  public Boolean getBooleanReqPar(final String name) {
     String reqpar = getReqPar(name);
 
     if (reqpar == null) {
@@ -248,7 +241,7 @@ public class ReqUtil implements Serializable {
       }
 
       return Boolean.valueOf(reqpar);
-    } catch (Throwable t) {
+    } catch (final Throwable ignored) {
       return null; // XXX exception?
     }
   }
@@ -258,12 +251,11 @@ public class ReqUtil implements Serializable {
    * @param name    name of parameter
    * @param defVal default value for absent parameter
    * @return  boolean   value
-   * @throws Throwable
    */
   public boolean getBooleanReqPar(final String name,
-                                  final boolean defVal) throws Throwable {
+                                  final boolean defVal) {
     boolean val = defVal;
-    Boolean valB = getBooleanReqPar(name);
+    final Boolean valB = getBooleanReqPar(name);
     if (valB != null) {
       val = valB;
     }
