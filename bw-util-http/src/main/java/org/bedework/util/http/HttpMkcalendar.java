@@ -16,11 +16,11 @@ public class HttpMkcalendar extends HttpRequestBase {
   public HttpMkcalendar() {
   }
 
-  public HttpMkcalendar(URI uri) {
+  public HttpMkcalendar(final URI uri) {
     this.setURI(uri);
   }
 
-  public HttpMkcalendar(String uri) {
+  public HttpMkcalendar(final String uri) {
     this.setURI(URI.create(uri));
   }
 

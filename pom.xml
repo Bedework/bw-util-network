@@ -15,10 +15,9 @@
     <maven.source.plugin.version>2.1.2</maven.source.plugin.version>
 
     <!-- Bedework Versions -->
-    <bw-util.version>4.0.27</bw-util.version>
-    <bw-util-conf.version>4.1.0</bw-util-conf.version>
+    <bw-util.version>4.0.28</bw-util.version>
+    <bw-util-conf.version>4.1.1</bw-util-conf.version>
     <bw-util-logging.version>4.0.5</bw-util-logging.version>
-    <bw-util-deploy.version>4.0.28-SNAPSHOT</bw-util-deploy.version>
 
     <!-- Third Party Library Versions -->
     <commons-logging.version>1.2</commons-logging.version>
@@ -63,7 +62,6 @@
     <module>bw-util-http</module>
     <module>bw-util-servlet</module>
     <module>bw-util-servlet-filters</module>
-    <module>bw-util-httpmodule</module>
   </modules>
 
   <developers>
@@ -242,37 +240,6 @@
           <version>2.3</version>
           <configuration>
           </configuration>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.5</version>
-          <executions>
-            <execution>
-              <id>default-descriptor</id>
-              <phase>process-classes</phase>
-            </execution>
-          </executions>
-          <configuration>
-            <goalPrefix>bw-util-deployment</goalPrefix>
-            <!--
-            <outputDirectory>target/dir</outputDirectory>-->
-          </configuration>
-        </plugin>
-
-        <plugin>
-          <groupId>org.bedework</groupId>
-          <artifactId>bw-util-maven-deploy-wfmodule</artifactId>
-          <version>${bw-util-deploy.version}</version>
-          <executions>
-            <execution>
-              <phase>install</phase>
-              <goals>
-                <goal>bw-deploy-wfmodule</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

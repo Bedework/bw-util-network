@@ -49,10 +49,10 @@ import static org.apache.http.HttpStatus.SC_OK;
  */
 public class ConfigurationDavStore implements ConfigurationStore {
   private String url;
-  private PooledHttpClient client;
-  private DavUtil du = new DavUtil();
+  private final PooledHttpClient client;
+  private final DavUtil du = new DavUtil();
 
-  private String path;
+  private final String path;
 
   /**
    * @param url of configs
@@ -71,7 +71,7 @@ public class ConfigurationDavStore implements ConfigurationStore {
       client = new PooledHttpClient(u);
 
       path = u.getPath();
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new ConfigException(t);
     }
   }
@@ -89,16 +89,16 @@ public class ConfigurationDavStore implements ConfigurationStore {
   @Override
   public void saveConfiguration(final ConfigBase config) throws ConfigException {
     try {
-      StringWriter sw = new StringWriter();
+      final StringWriter sw = new StringWriter();
 
       config.toXml(sw);
 
       client.put(path + config.getName() + ".xml",
                  sw.toString(),
                  "application/xml");
-    } catch (ConfigException ce) {
+    } catch (final ConfigException ce) {
       throw ce;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new ConfigException(t);
     }
   }
@@ -112,9 +112,9 @@ public class ConfigurationDavStore implements ConfigurationStore {
   public ConfigBase getConfig(final String name,
                               final Class cl) throws ConfigException {
     try {
-      ResponseHolder resp = client.get(path + "/" + name + ".xml",
-                                       "text/xml",
-                                       this::processGetResponse);
+      final ResponseHolder resp = client.get(path + "/" + name + ".xml",
+                                             "text/xml",
+                                             this::processGetResponse);
 
       if (resp.failed) {
         return null;
@@ -125,9 +125,9 @@ public class ConfigurationDavStore implements ConfigurationStore {
               new ByteArrayInputStream(xml.getBytes());
 
       return new ConfigBase().fromXml(bais, cl);
-    } catch (ConfigException ce) {
+    } catch (final ConfigException ce) {
       throw ce;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new ConfigException(t);
     }
   }
@@ -158,16 +158,16 @@ public class ConfigurationDavStore implements ConfigurationStore {
   @Override
   public List<String> getConfigs() throws ConfigException {
     try {
-      Collection<DavChild> dcs = du.getChildrenUrls(client, path, null);
-      List<String> names = new ArrayList<>();
+      final Collection<DavChild> dcs = du.getChildrenUrls(client, path, null);
+      final List<String> names = new ArrayList<>();
 
-      URI parentUri = new URI(url);
-      for (DavChild dc: dcs) {
+      final URI parentUri = new URI(url);
+      for (final DavChild dc: dcs) {
         if (dc.isCollection) {
           continue;
         }
 
-        String child = parentUri.relativize(new URI(dc.uri)).getPath();
+        final String child = parentUri.relativize(new URI(dc.uri)).getPath();
 
         if (!child.endsWith(".xml")){
           continue;
@@ -177,7 +177,7 @@ public class ConfigurationDavStore implements ConfigurationStore {
       }
 
       return names;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new ConfigException(t);
     }
   }
@@ -190,15 +190,15 @@ public class ConfigurationDavStore implements ConfigurationStore {
         newPath += "/";
       }
 
-      DavChild dc = du.getProps(client, newPath, null);
+      final DavChild dc = du.getProps(client, newPath, null);
 
       if (dc == null) {
         throw new ConfigException("mkcol not implemented");
       }
 
-      URI parentUri = new URI(url);
+      final URI parentUri = new URI(url);
       return new ConfigurationDavStore(parentUri.relativize(new URI(dc.uri)).toASCIIString());
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new ConfigException(t);
     }
   }

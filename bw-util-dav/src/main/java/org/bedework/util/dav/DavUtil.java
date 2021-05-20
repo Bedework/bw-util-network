@@ -39,7 +39,6 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
@@ -77,7 +76,7 @@ public class DavUtil implements Logged, Serializable {
   /** Added to each request */
   protected List<Header> extraHeaders;
 
-  private Set<String> nameSpaces = new TreeSet<>();
+  private final Set<String> nameSpaces = new TreeSet<>();
 
   /**
    */
@@ -131,7 +130,7 @@ public class DavUtil implements Logged, Serializable {
         return null;
       }
 
-      for (DavProp dp: propVals) {
+      for (final DavProp dp: propVals) {
         if (nm.equals(dp.name)) {
           return dp;
         }
@@ -243,11 +242,11 @@ public class DavUtil implements Logged, Serializable {
    * @return Collection<DavChild>
    */
   public MultiStatusResponse getMultiStatusResponse(final InputStream in) {
-    MultiStatusResponse res = new MultiStatusResponse();
+    final MultiStatusResponse res = new MultiStatusResponse();
 
-    Document doc = parseContent(in);
+    final Document doc = parseContent(in);
 
-    Element root = doc.getDocumentElement();
+    final Element root = doc.getDocumentElement();
 
     /*    <!ELEMENT multistatus (response+, responsedescription?) > */
 
@@ -261,11 +260,11 @@ public class DavUtil implements Logged, Serializable {
    * @return Collection<DavChild>
    */
   public MultiStatusResponse getExtMkcolResponse(final InputStream in) {
-    MultiStatusResponse res = new MultiStatusResponse();
+    final MultiStatusResponse res = new MultiStatusResponse();
 
-    Document doc = parseContent(in);
+    final Document doc = parseContent(in);
 
-    Element root = doc.getDocumentElement();
+    final Element root = doc.getDocumentElement();
 
     /*    <!ELEMENT multistatus (response+, responsedescription?) > */
 
@@ -276,10 +275,10 @@ public class DavUtil implements Logged, Serializable {
 
   private MultiStatusResponse getMsrEmcr(final Element root,
                                          final MultiStatusResponse res) {
-    Collection<Element> responses = getChildren(root);
+    final Collection<Element> responses = getChildren(root);
 
     int count = 0; // validity
-    for (Element resp: responses) {
+    for (final Element resp: responses) {
       count++;
 
       if (XmlUtil.nodeMatches(resp, WebdavTags.responseDescription)) {
@@ -300,10 +299,10 @@ public class DavUtil implements Logged, Serializable {
       /*    <!ELEMENT response (href, ((href*, status)|(propstat+)),
                           responsedescription?) >
        */
-      MultiStatusResponseElement msre = new MultiStatusResponseElement();
+      final MultiStatusResponseElement msre = new MultiStatusResponseElement();
       res.responses.add(msre);
 
-      Iterator<Element> elit = getChildren(resp).iterator();
+      final Iterator<Element> elit = getChildren(resp).iterator();
 
       Element nd = elit.next();
 
@@ -357,11 +356,11 @@ public class DavUtil implements Logged, Serializable {
 
         /*    <!ELEMENT propstat (prop, status, responsedescription?) > */
 
-        PropstatElement pse = new PropstatElement();
+        final PropstatElement pse = new PropstatElement();
         msre.propstats.add(pse);
 
-        Iterator<Element> propstatit = getChildren(nd).iterator();
-        Node propnd = propstatit.next();
+        final Iterator<Element> propstatit = getChildren(nd).iterator();
+        final Node propnd = propstatit.next();
 
         if (!XmlUtil.nodeMatches(propnd, WebdavTags.prop)) {
           throw new RuntimeException("Bad response. Expected prop found " + propnd);
@@ -374,7 +373,7 @@ public class DavUtil implements Logged, Serializable {
         pse.status = httpStatus(propstatit.next());
 
         if (propstatit.hasNext()) {
-          Node rdesc = propstatit.next();
+          final Node rdesc = propstatit.next();
 
           if (!XmlUtil.nodeMatches(rdesc, WebdavTags.responseDescription)) {
             throw new RuntimeException("Bad response, expected null or " +
@@ -457,13 +456,13 @@ public class DavUtil implements Logged, Serializable {
       }
 
       return resp.response;
-    } catch (final IOException | HttpException e) {
+    } catch (final HttpException e) {
       throw new RuntimeException(e);
     }
   }
 
   final ResponseHolder<Collection<DavChild>> processSyncResponse(final String path,
-                                                                 CloseableHttpResponse resp) {
+                                                                 final CloseableHttpResponse resp) {
     try {
       final int status = HttpUtil.getStatus(resp);
 
@@ -586,7 +585,7 @@ public class DavUtil implements Logged, Serializable {
       }
 
       return resp.response;
-    } catch (final IOException | HttpException e) {
+    } catch (final HttpException e) {
       throw new RuntimeException(e);
     }
   }
@@ -646,11 +645,7 @@ public class DavUtil implements Logged, Serializable {
   protected void addNs(final XmlEmit xml,
                        final String val) {
     if (xml.getNameSpace(val) == null) {
-      try {
-        xml.addNs(new NameSpace(val, null), false);
-      } catch (final IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
+      xml.addNs(new NameSpace(val, null), false);
     }
   }
 
@@ -662,11 +657,11 @@ public class DavUtil implements Logged, Serializable {
    */
   protected Document parseContent(final InputStream in) {
     try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory
+      final DocumentBuilderFactory factory = DocumentBuilderFactory
               .newInstance();
       factory.setNamespaceAware(true);
 
-      DocumentBuilder builder = factory.newDocumentBuilder();
+      final DocumentBuilder builder = factory.newDocumentBuilder();
 
       return builder
               .parse(new InputSource(new InputStreamReader(in)));
@@ -879,9 +874,9 @@ public class DavUtil implements Logged, Serializable {
       if (XmlUtil.nodeMatches(resp, WebdavTags.syncToken)) {
         // We did a sync report. Add the token to the list
 
-        DavChild dc = new DavChild();
+        final DavChild dc = new DavChild();
 
-        DavProp dp = new DavProp();
+        final DavProp dp = new DavProp();
         dp.name = WebdavTags.syncToken;
         dp.element = resp;
         dp.status = HttpServletResponse.SC_OK;
@@ -899,7 +894,7 @@ public class DavUtil implements Logged, Serializable {
                                     "(response+, responsedescription?) found " + resp);
       }
 
-      DavChild dc = makeDavResponse(resp);
+      final DavChild dc = makeDavResponse(resp);
 
       /* We get the collection back as well - check for it and skip it. */
       final URI childURI;
@@ -935,7 +930,7 @@ public class DavUtil implements Logged, Serializable {
     DavChild dc = null;
 
     int count = 0; // validity
-    for (Element resp: responseElements) {
+    for (final Element resp: responseElements) {
       count++;
 
       if (XmlUtil.nodeMatches(resp, WebdavTags.responseDescription)) {
@@ -996,8 +991,8 @@ public class DavUtil implements Logged, Serializable {
 
       /*    <!ELEMENT propstat (prop, status, responsedescription?) > */
 
-      Iterator<Element> propstatit = getChildren(nd).iterator();
-      Node propnd = propstatit.next();
+      final Iterator<Element> propstatit = getChildren(nd).iterator();
+      final Node propnd = propstatit.next();
 
       if (!XmlUtil.nodeMatches(propnd, WebdavTags.prop)) {
         throw new RuntimeException("Bad response. Expected prop found " + propnd);
@@ -1010,7 +1005,7 @@ public class DavUtil implements Logged, Serializable {
       final int st = httpStatus(propstatit.next());
 
       if (propstatit.hasNext()) {
-        Node rdesc = propstatit.next();
+        final Node rdesc = propstatit.next();
 
         if (!XmlUtil.nodeMatches(rdesc, WebdavTags.responseDescription)) {
           throw new RuntimeException("Bad response, expected null or " +
@@ -1020,15 +1015,15 @@ public class DavUtil implements Logged, Serializable {
 
       /* process each property with this status */
 
-      Collection<Element> respProps = getChildren(propnd);
+      final Collection<Element> respProps = getChildren(propnd);
 
-      for (Element pr: respProps) {
+      for (final Element pr: respProps) {
         /* XXX This needs fixing to handle content that is xml
          */
         if (XmlUtil.nodeMatches(pr, WebdavTags.resourcetype)) {
-          Collection<Element> rtypeProps = getChildren(pr);
+          final Collection<Element> rtypeProps = getChildren(pr);
 
-          for (Element rtpr: rtypeProps) {
+          for (final Element rtpr: rtypeProps) {
             if (XmlUtil.nodeMatches(rtpr, WebdavTags.collection)) {
               dc.isCollection = true;
             }
@@ -1036,7 +1031,7 @@ public class DavUtil implements Logged, Serializable {
             dc.resourceTypes.add(XmlUtil.fromNode(rtpr));
           }
         } else {
-          DavProp dp = new DavProp();
+          final DavProp dp = new DavProp();
 
           dc.propVals.add(dp);
 
@@ -1066,7 +1061,7 @@ public class DavUtil implements Logged, Serializable {
    *                   Logged methods
    * ==================================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {
