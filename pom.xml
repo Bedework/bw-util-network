@@ -22,39 +22,4 @@
     <module>bw-util-servlet</module>
     <module>bw-util-servlet-filters</module>
   </modules>
-
-  <dependencyManagement>
-    <dependencies>
-      <!-- Bedework -->
-      <dependency>
-        <groupId>org.bedework</groupId>
-        <artifactId>bw-util-config</artifactId>
-        <version>${bw-util-conf.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.bedework</groupId>
-        <artifactId>bw-util-jmx</artifactId>
-        <version>${bw-util-conf.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.bedework</groupId>
-        <artifactId>bw-util-logging</artifactId>
-        <version>${bw-util-logging.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.bedework</groupId>
-        <artifactId>bw-util-misc</artifactId>
-        <version>${bw-util.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.bedework</groupId>
-        <artifactId>bw-util-xml</artifactId>
-        <version>${bw-util.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 </project>
