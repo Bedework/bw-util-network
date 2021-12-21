@@ -15,6 +15,13 @@
   <description>Network (http, DAV,servlet etc) related utilities</description>
   <url>https://github.com/Bedework/bw-util-network</url>
 
+  <scm>
+    <connection>scm:git:git@github.com:Bedework/bw-util-network.git</connection>
+    <developerConnection>scm:git:git@github.com:Bedework/bw-util-network.git</developerConnection>
+    <url>https://github.com/Bedework/bw-util-network</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <modules>
     <module>bw-util-config-http</module>
     <module>bw-util-dav</module>
