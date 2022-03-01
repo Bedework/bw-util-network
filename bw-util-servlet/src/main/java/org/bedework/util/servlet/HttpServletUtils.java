@@ -20,6 +20,7 @@ package org.bedework.util.servlet;
 
 import org.bedework.util.logging.BwLogger;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -51,10 +52,17 @@ public class HttpServletUtils {
    * @return null for none or possibly lowercased version
    */
   public static String remoteUser(final HttpServletRequest request) {
-    final String user = request.getRemoteUser();
+    String user = request.getRemoteUser();
 
     if (user == null) {
-      return null;
+      final Principal pr = request.getUserPrincipal();
+      if (pr != null) {
+        user = pr.getName();
+      }
+
+      if (user == null) {
+        return null;
+      }
     }
 
     final String mixedStr = System.getenv("BEDEWORK_MIXEDCASE_ACCOUNTS");
