@@ -70,15 +70,6 @@ import javax.servlet.http.HttpSession;
  * @version June 18th 2003
  */
 public class ConfiguredXSLTFilter extends XSLTFilter {
-  /** Overide this to set the value or turn off presentation support
-   * by returning null or the value "NONE".
-   *
-   * @return attribute name
-   */
-  public String getPresentationAttrName() {
-    return PresentationState.presentationAttrName;
-  }
-
   /** set by init parameter with this name
    */
   private boolean directoryBrowsingDisallowed;
@@ -274,20 +265,15 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
    * @param request
    * @return PresentationState
    */
-  protected PresentationState getPresentationState(HttpServletRequest request) {
-    String attrName = getPresentationAttrName();
-
-    if ((attrName == null) ||
-         (attrName.equals("NONE"))) {
-      return null;
-    }
+  protected PresentationState getPresentationState(final HttpServletRequest request) {
+    final String attrName = PresentationState.presentationAttrName;
 
     /* First try the request */
 
     Object o = request.getAttribute(attrName);
 
     if (o == null) {
-      HttpSession sess = request.getSession(false);
+      final HttpSession sess = request.getSession(false);
 
       if (sess == null) {
         return null;
