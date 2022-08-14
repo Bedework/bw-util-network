@@ -20,8 +20,6 @@ package org.bedework.util.servlet.io;
 
 import org.bedework.util.jmx.ConfBase;
 
-import java.io.IOException;
-
 /** See if we can't manage buffers better than the standard java classes - at
  * least for the specific use we have. We are generating a lot of output and
  * causing a lot of expansion and copying.
@@ -33,8 +31,8 @@ import java.io.IOException;
  */
 public class PooledBuffers extends ConfBase<PooledBuffersPropertiesImpl>
         implements PooledBuffersMBean {
-  /* Name of the property holding the location of the config data */
-  public static final String confuriPname = "org.bedework.io.confuri";
+  /* Name of the directory holding the config data */
+  private static final String confDirName = "io";
 
   private static BufferPool smallBufferPool;
   private static BufferPool mediumBufferPool;
@@ -48,11 +46,7 @@ public class PooledBuffers extends ConfBase<PooledBuffersPropertiesImpl>
    * Creates a new pooled buffered output stream.
    */
   public PooledBuffers() {
-    super(getServiceName(nm));
-
-    setConfigName(nm);
-
-    setConfigPname(confuriPname);
+    super(getServiceName(nm), confDirName, nm);
 
     loadConfig();
 
@@ -65,7 +59,7 @@ public class PooledBuffers extends ConfBase<PooledBuffersPropertiesImpl>
   }
 
   /**
-   * @param name
+   * @param name to build from
    * @return object name value for the mbean with this name
    */
   public static String getServiceName(final String name) {
@@ -74,7 +68,7 @@ public class PooledBuffers extends ConfBase<PooledBuffersPropertiesImpl>
 
   @Override
   public String loadConfig() {
-    String res = loadConfig(PooledBuffersPropertiesImpl.class);
+    final String res = loadConfig(PooledBuffersPropertiesImpl.class);
     staticConf = getConfig();
 
     return res;
@@ -88,9 +82,8 @@ public class PooledBuffers extends ConfBase<PooledBuffersPropertiesImpl>
    * benefit of pooling.
    *
    * @param buff - the buffer
-   * @throws java.io.IOException
    */
-  static void release(BufferPool.Buffer buff) throws IOException {
+  static void release(final BufferPool.Buffer buff) {
     if (buff.buf.length == staticConf.getSmallBufferSize()) {
       smallBufferPool.put(buff);
     } else if (buff.buf.length == staticConf.getMediumBufferSize()) {

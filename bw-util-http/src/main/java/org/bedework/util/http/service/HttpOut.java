@@ -31,19 +31,14 @@ import org.apache.http.pool.PoolStats;
 public class HttpOut extends ConfBase<HttpConfigImpl>
         implements HttpOutMBean {
   /**
-   * @param confuriPname
-   * @param domain e.g. org.bedework.bwengine
+   * @param confDir e.g. org.bedework.bwengine
    * @param serviceName
    */
-  public HttpOut(final String confuriPname,
-                 final String domain,
+  public HttpOut(final String confDir,
                  final String serviceName) {
-    super();
-
-    setConfigName(serviceName);
-
-    setConfigPname(confuriPname);
-    setServiceName(domain + ":service=" + serviceName);
+    super(confDir + ":service=" + serviceName,
+          confDir,
+          serviceName);
   }
 
   @Override

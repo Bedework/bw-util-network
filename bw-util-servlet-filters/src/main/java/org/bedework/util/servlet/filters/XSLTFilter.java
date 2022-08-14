@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.Enumeration;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -60,10 +60,11 @@ public class XSLTFilter extends AbstractFilter implements Logged {
    * <p>Thsi may not be the actual path as components may be defaulted.
    * pathMap maps the 'ideal' path on to the actual path to the skin.
    */
-  private static HashMap<String, String> pathMap = new HashMap<String, String>();
+  private static final HashMap<String, String> pathMap =
+          new HashMap<>();
 
-  private static HashMap<String, Transformer> transformers =
-    new HashMap<String, Transformer>();
+  private static final HashMap<String, Transformer> transformers =
+          new HashMap<>();
 
   /** This can be set in the web.xml configuration to run with a single
    * transformer
@@ -72,7 +73,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
   private boolean ignoreContentType;
 
-  private TransformerFactory tf = TransformerFactory.newInstance();
+  private final TransformerFactory tf = TransformerFactory.newInstance();
 
   /** globals
    *
@@ -88,7 +89,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
   }
 
   /**
-   * @param req
+   * @param req HTTP Servlet Request
    * @return our globals
    */
   public XsltGlobals getXsltGlobals(final HttpServletRequest req) {
@@ -102,8 +103,8 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
   /** Set the url to be used for the next transform.
    *
-   * @param req
-   * @param ideal
+   * @param req HTTP Servlet Request
+   * @param ideal ideal or virtual path
    */
   public void setUrl(final HttpServletRequest req, final String ideal) {
     getXsltGlobals(req).url = ideal;
@@ -111,7 +112,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
   /** Get the url to be used for the next transform.
    *
-   * @param req
+   * @param req HTTP Servlet Request
    * @return url
    */
   public String getUrl(final HttpServletRequest req) {
@@ -120,8 +121,8 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
   /** Set ideal to actual mapping.
    *
-   * @param ideal
-   * @param actual
+   * @param ideal ideal or virtual path
+   * @param actual an actual path
    */
   public void setPath(final String ideal, final String actual) {
     synchronized (transformers) {
@@ -131,7 +132,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
   /** Get the url to be used for the next transform after mapping with pathMap.
    *
-   * @param ideal
+   * @param ideal ideal or virtual path
    * @return url
    */
   public String lookupPath(final String ideal) {
@@ -161,7 +162,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
    */
   public Transformer getXmlTransformer(final String ideal)
       throws TransformerException, ServletException, FileNotFoundException {
-    String url = lookupPath(ideal);
+    final String url = lookupPath(ideal);
     if (debug()) {
       debug("getXmlTransformer: ideal = " + ideal +
                         " actual = " + url);
@@ -174,13 +175,13 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
     try {
       trans = tf.newTransformer(new StreamSource(url));
-    } catch (TransformerConfigurationException tce) {
-      /** Work our way down the chain to see if we have an embedded file
+    } catch (final TransformerConfigurationException tce) {
+      /* Work our way down the chain to see if we have an embedded file
        * not found. If so, throw that to let the caller try another path.
        */
       Throwable cause = tce.getCause();
       while (cause instanceof TransformerException) {
-        cause = ((TransformerException)cause).getCause();
+        cause = cause.getCause();
       }
 
       if (!(cause instanceof FileNotFoundException)) {
@@ -201,7 +202,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
     }
 
     synchronized (transformers) {
-      Transformer trans2 = transformers.get(url);
+      final Transformer trans2 = transformers.get(url);
 
       if (trans2 != null) {
         // somebody beat us to it.
@@ -214,9 +215,6 @@ public class XSLTFilter extends AbstractFilter implements Logged {
     return trans;
   }
 
-  /* (non-Javadoc)
-   * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
-   */
   @Override
   public void init(final FilterConfig filterConfig) throws ServletException {
     super.init(filterConfig);
@@ -228,7 +226,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
                                         " using xslt " + configUrl);
     }
 
-    String temp = filterConfig.getInitParameter("ignoreContentType");
+    final String temp = filterConfig.getInitParameter("ignoreContentType");
 
     ignoreContentType = "true".equals(temp);
   }
@@ -238,17 +236,17 @@ public class XSLTFilter extends AbstractFilter implements Logged {
                        final ServletResponse response,
                        final FilterChain filterChain)
          throws IOException, ServletException {
-    HttpServletRequest hreq = (HttpServletRequest)req;
+    final HttpServletRequest hreq = (HttpServletRequest)req;
     final HttpServletResponse resp = (HttpServletResponse)response;
-    long startTime = System.currentTimeMillis();
+    final long startTime = System.currentTimeMillis();
 
-    PooledBufferedOutputStream pbos = new PooledBufferedOutputStream();
+    final PooledBufferedOutputStream pbos = new PooledBufferedOutputStream();
 
-    WrappedResponse wrappedResp = new WrappedResponse(resp, hreq);
+    final WrappedResponse wrappedResp = new WrappedResponse(resp, hreq);
 
     filterChain.doFilter(req, wrappedResp);
 
-    XsltGlobals glob = getXsltGlobals(hreq);
+    final XsltGlobals glob = getXsltGlobals(hreq);
 
     glob.reason = null;
 
@@ -262,8 +260,8 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
     /* We don't get a session till we've been through to the servlet.
      */
-    HttpSession sess = hreq.getSession(false);
-    String sessId;
+    final HttpSession sess = hreq.getSession(false);
+    final String sessId;
     if (sess == null) {
       sessId = "NONE";
     } else {
@@ -302,7 +300,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
         try {
           xmlt = getXmlTransformer(glob.url);
-        } catch (TransformerException te1) {
+        } catch (final TransformerException te1) {
           te = te1;
         }
 
@@ -314,14 +312,14 @@ public class XSLTFilter extends AbstractFilter implements Logged {
                                  pbos);
           glob.contentType = "text/html";
         } else if (te != null) {
-          /** We had an exception getting the transformer.
+          /* We had an exception getting the transformer.
               Output error information instead of the transformed output
            */
 
           outputInitErrorInfo(te, pbos);
           glob.contentType = "text/html";
         } else {
-          /** We seem to be getting invalid bytes occasionally
+          /* We seem to be getting invalid bytes occasionally
           for (int i = 0; i < bytes.length; i++) {
             if ((bytes[i] & 0x0ff) > 128) {
               warn("Found byte > 128 at " + i +
@@ -331,7 +329,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
           }
           The above commented out. It breaks Unicode characters
            */
-          /** Managed to get a transformer. Do the thing.
+          /* Managed to get a transformer. Do the thing.
             */
           try {
             /* The choice is a pool of transformers per thread or to
@@ -343,21 +341,20 @@ public class XSLTFilter extends AbstractFilter implements Logged {
             synchronized (xmlt) {
               xmlt.transform(
                   new StreamSource(
-                       new InputStreamReader(wrappedResp.getInputStream(),
-                                             "UTF-8")),
-                            new StreamResult(pbos));
+                       new InputStreamReader(
+                               wrappedResp.getInputStream(),
+                               StandardCharsets.UTF_8)),
+                  new StreamResult(pbos));
             }
-          } catch (TransformerException e) {
+          } catch (final TransformerException e) {
             outputTransformErrorInfo(e, pbos);
             glob.contentType = "text/html";
           }
 
           if (debug()) {
-            Properties pr = xmlt.getOutputProperties();
+            final Properties pr = xmlt.getOutputProperties();
             if (pr != null) {
-              Enumeration en = pr.propertyNames();
-              while (en.hasMoreElements()) {
-                String key = (String)en.nextElement();
+              for (final String key: pr.stringPropertyNames()) {
                 debug("--------- xslt-output property " +
                                 key + "=" + pr.getProperty(key));
               }
@@ -366,19 +363,19 @@ public class XSLTFilter extends AbstractFilter implements Logged {
         }
 
         if (glob.contentType != null) {
-          /** Set explicitly by caller.
+          /* Set explicitly by caller.
            */
           resp.setContentType(glob.contentType);
         } else {
-          /** The encoding and media type should be available from the
+          /* The encoding and media type should be available from the
            *  Transformer. Letting the stylesheet dictate the media-type
            *  is the right thing to do as only the stylesheet knows what
            *  it's producing.
            */
-          Properties pr = xmlt.getOutputProperties();
+          final Properties pr = xmlt.getOutputProperties();
           if (pr != null) {
-            String encoding = pr.getProperty("encoding");
-            String mtype = pr.getProperty("media-type");
+            final String encoding = pr.getProperty("encoding");
+            final String mtype = pr.getProperty("media-type");
 
             if (mtype != null) {
               if (debug()) {
@@ -451,8 +448,8 @@ public class XSLTFilter extends AbstractFilter implements Logged {
     protected HttpServletRequest req;
 
     /**
-     * @param response
-     * @param req
+     * @param response HTTP Servlet Respone
+     * @param req HTTP Servlet Request
      */
     public WrappedResponse(final HttpServletResponse response,
                            final HttpServletRequest req) {
@@ -461,7 +458,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
     }
 
     /**
-     * @param val
+     * @param val true if transform needed
      */
     public void setTransformNeeded(final boolean val) {
       transformNeeded = val;
@@ -476,7 +473,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
     @Override
     public void setContentType(final String type) {
-      XsltGlobals glob = getXsltGlobals(req);
+      final XsltGlobals glob = getXsltGlobals(req);
 
       if (ignoreContentType) {
         transformNeeded = true;
@@ -502,12 +499,12 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
   private void outputInitErrorInfo(final TransformerException te,
                                    final OutputStream wtr) {
-    PrintWriter pw = new PrintWriter(wtr);
+    final PrintWriter pw = new PrintWriter(wtr);
 
     outputErrorHtmlHead(pw, "XSLT initialization errors");
     pw.println("<body>");
 
-    SourceLocator sl = te.getLocator();
+    final SourceLocator sl = te.getLocator();
 
     if (sl != null) {
       pw.println("<table>");
@@ -524,7 +521,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
   private void outputTransformErrorInfo(final Exception e,
                                         final OutputStream wtr) {
-    PrintWriter pw = new PrintWriter(wtr);
+    final PrintWriter pw = new PrintWriter(wtr);
 
     outputErrorHtmlHead(pw, "XSLT transform error");
     pw.println("<body>");
@@ -540,9 +537,11 @@ public class XSLTFilter extends AbstractFilter implements Logged {
     pw.println("</html>");
   }
 
-  private void outputErrorMessage(final String title, final String para,
+  @SuppressWarnings("SameParameterValue")
+  private void outputErrorMessage(final String title,
+                                  final String para,
                                   final OutputStream wtr) {
-    PrintWriter pw = new PrintWriter(wtr);
+    final PrintWriter pw = new PrintWriter(wtr);
 
     outputErrorHtmlHead(pw, title);
     pw.println("<body>");
@@ -585,21 +584,20 @@ public class XSLTFilter extends AbstractFilter implements Logged {
   }
 
   private void logTime(final String recId, final String sessId, final long timeVal) {
-    StringBuffer sb = new StringBuffer(recId);
+    info(new StringBuilder(recId)
+                 .append(":")
+                 .append(sessId)
+                 .append(":")
+                 .append(timeVal)
 
-    sb.append(":");
-    sb.append(sessId);
-    sb.append(":");
-    sb.append(timeVal);
-
-    info(sb.toString());
+                 .toString());
   }
 
   /* ====================================================================
    *                   Logged methods
    * ==================================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {
