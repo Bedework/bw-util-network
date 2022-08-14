@@ -133,7 +133,7 @@ public class HttpOut extends ConfBase<HttpConfigImpl>
 
   @Override
   public String loadConfig() {
-    String res = loadConfig(HttpConfigImpl.class);
+    final String res = loadConfig(HttpConfigImpl.class);
 
     refresh();
 
