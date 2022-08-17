@@ -20,6 +20,7 @@ package org.bedework.util.servlet.filters;
 
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
+import org.bedework.util.misc.Util;
 import org.bedework.util.servlet.HttpServletUtils;
 import org.bedework.util.servlet.io.ByteArrayWrappedResponse;
 import org.bedework.util.servlet.io.PooledBufferedOutputStream;
@@ -49,6 +50,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import static java.lang.String.format;
+
 /** Class to implement a basic XSLT filter. The final configuration of this
  *  object can be carried out by overriding init.
  *  <p>Loosely based on some public example of filter code.</p>
@@ -73,7 +76,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
   private boolean ignoreContentType;
 
-  private final TransformerFactory tf = TransformerFactory.newInstance();
+  private final TransformerFactory tf;
 
   /** globals
    *
@@ -86,6 +89,17 @@ public class XSLTFilter extends AbstractFilter implements Logged {
     /** Reason we had a problem
      */
     public String reason = null;
+  }
+
+  public XSLTFilter() {
+    if ("yes".equals(
+            System.getProperty("org.bedework.use.saxon"))) {
+      tf = (TransformerFactory)Util.getObject(
+              "net.sf.saxon.TransformerFactoryImpl",
+              TransformerFactory.class);
+    } else {
+      tf = TransformerFactory.newInstance();
+    }
   }
 
   /**
@@ -210,6 +224,12 @@ public class XSLTFilter extends AbstractFilter implements Logged {
       }
 
       transformers.put(url, trans);
+    }
+
+    if (debug()) {
+      debug(format("Obtained new transformer with class %s" +
+                           " from factory class %s",
+                   trans.getClass(), tf.getClass()));
     }
 
     return trans;
