@@ -240,6 +240,10 @@ public class ReqUtil implements Serializable {
         reqpar = "true";
       }
 
+      if (reqpar.equalsIgnoreCase("on")) {
+        reqpar = "true";
+      }
+
       return Boolean.valueOf(reqpar);
     } catch (final Throwable ignored) {
       return null; // XXX exception?
