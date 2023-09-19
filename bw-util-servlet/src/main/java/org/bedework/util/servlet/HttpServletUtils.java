@@ -65,6 +65,30 @@ public class HttpServletUtils {
       }
     }
 
+    // Look for BEDEWORK_STRIP_DOMAIN=[*]<domain>
+    final String stripDomain = System.getProperty("com.bedework.strip.domain");
+
+    final int atPos = user.indexOf("@");
+    if ((stripDomain != null) &&
+            (atPos > 0) &&
+            (atPos < (user.length() - 1))) {
+      // we don't have "id@"
+      final String userDomain = user.substring(atPos + 1);
+      final String userId = user.substring(0, atPos);
+      final String domain;
+      final boolean wildcard = stripDomain.startsWith("*");
+      if (wildcard && (stripDomain.length() == 1)) {
+        //Just *
+        user = userId;
+      } else if (wildcard) {
+        if (userDomain.toLowerCase().endsWith(stripDomain.substring(1).toLowerCase())) {
+          user = userId;
+        }
+      } else if (userDomain.equalsIgnoreCase(stripDomain)) {
+        user = userId;
+      }
+    }
+
     final String mixedStr = System.getenv("BEDEWORK_MIXEDCASE_ACCOUNTS");
 
     final boolean mixed = (mixedStr != null) && (mixedStr.equalsIgnoreCase("true"));
