@@ -36,8 +36,40 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 
 ### Release Notes
 #### 4.1.0
-    * Split off from bw-util
-    * Dav: Add getExtMkcolResponse method
-    * Dav: Fix parsing of multi-status. Was not handling no propstat correctly
-    * Http: Add proppatch method
-    * Http: Parameterize ProcessResponse interface
+* Split off from bw-util
+* Dav: Add getExtMkcolResponse method
+* Dav: Fix parsing of multi-status. Was not handling no propstat correctly
+* Http: Add proppatch method
+* Http: Parameterize ProcessResponse interface
+
+#### 4.1.1
+ * Update library versions.
+ * Remove a bunch of unnecessary throws clauses
+
+#### 4.1.2
+ * Update library versions.
+
+#### 4.1.3
+ * Update library versions.
+
+#### 4.1.4
+ * Update library versions.
+
+#### 5.0.0
+* Update library versions.
+* Use bedework-parent
+
+#### 5.0.1
+* Update library versions.
+* HttpServletUtils: Use the principal name if REMOTE_USER is not set. Keycloak shib code needs this.
+
+#### 5.0.2
+* Update library versions.
+* ConfiguredXSLTFilter: Use name defined in PresentationState
+
+#### 5.1.0
+* Update library versions.
+* Fix up a bunch of introduced config errors
+* Add support for the Saxon XSLT support
+* Allow "on" in ReqPar
+* HttpServletUtils: Implement stripping of domain from principal
