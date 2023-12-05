@@ -10,7 +10,7 @@
   <packaging>pom</packaging>
 
   <artifactId>bw-util-network</artifactId>
-  <version>5.1.0</version>
+  <version>5.1.1-SNAPSHOT</version>
   <name>Bedework: network utils</name>
   <description>Network (http, DAV,servlet etc) related utilities</description>
   <url>https://github.com/Bedework/bw-util-network</url>
