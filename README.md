@@ -73,3 +73,6 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 * Add support for the Saxon XSLT support
 * Allow "on" in ReqPar
 * HttpServletUtils: Implement stripping of domain from principal
+
+#### 5.1.1
+* Update library versions.
