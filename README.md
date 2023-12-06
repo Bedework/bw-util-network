@@ -82,3 +82,6 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 
 #### 5.1.3
 * Update util-conf version.
+
+#### 5.1.4
+* Sonatype failure- redo release.
