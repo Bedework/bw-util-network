@@ -76,3 +76,9 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 
 #### 5.1.1
 * Update library versions.
+
+#### 5.1.2
+* Update library versions.
+
+#### 5.1.3
+* Update util-conf version.
