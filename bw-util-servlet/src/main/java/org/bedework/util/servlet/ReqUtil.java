@@ -114,6 +114,18 @@ public class ReqUtil implements Serializable {
     return request.getParameter(name) != null;
   }
 
+  /** See if a request parameter is absent or has an empty
+   * value. Returns true for not present or no value or
+   * zero length value
+   *
+   * @param name    name of parameter
+   * @return  boolean true for empty
+   */
+  public boolean empty(final String name) {
+    final var par = request.getParameter(name);
+    return (par == null) || par.isEmpty();
+  }
+
   /** See if a request parameter is present and not null or empty
    *
    * @param name    name of parameter
