@@ -286,13 +286,7 @@ public class ReqUtil implements Serializable {
    */
   public void setSessionAttr(final String attrName,
                              final Object val) {
-    final HttpSession sess = request.getSession(false);
-
-    if (sess == null) {
-      return;
-    }
-
-    sess.setAttribute(attrName, val);
+    request.getSession().setAttribute(attrName, val);
   }
 
   /** Remove a named session attribute.

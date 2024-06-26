@@ -20,6 +20,7 @@ package org.bedework.util.servlet.filters;
 
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
+import org.bedework.util.servlet.HttpServletUtils;
 
 import java.io.Serializable;
 
@@ -39,7 +40,7 @@ public class PresentationState implements Logged, Serializable {
            "bw_presentationstate";
 
   /** The request name we expect. */
-  private String appRootRequestName = "appRoot";
+  private final String appRootRequestName = "appRoot";
 
   /** appRoot is where we find web related static info used by the program,
      such as XSLT stylesheets.
@@ -54,7 +55,7 @@ public class PresentationState implements Logged, Serializable {
   private String browserResourceRoot;
 
   /** The requet name we expect. */
-  private String browserTypeRequestName = "browserType";
+  private final static String browserTypeRequestName = "browserType";
 
   /** Set to the current or preferred browser type.
    * If browserTypeSticky is true we set the form browser type from this.
@@ -62,23 +63,23 @@ public class PresentationState implements Logged, Serializable {
    */
   private String browserType;
 
-  /** The requet name we expect. */
-  private String browserTypeStickyRequestName = "browserTypeSticky";
+  /** The request name we expect. */
+  private final static String browserTypeStickyRequestName = "browserTypeSticky";
 
   /** If true we set the form browser type from the browserType here.
-   * Otherwise we set the browser type here from the form.
+   * Otherwise, we set the browser type here from the form.
    */
   private boolean browserTypeSticky;
 
-  /** The requet name we expect. */
-  private String contentTypeRequestName = "contentType";
+  /** The request name we expect. */
+  private final String contentTypeRequestName = "contentType";
 
   /** One shot content type.
    */
   private String contentType;
 
-  /** The requet name we expect. */
-  private String contentTypeStickyRequestName = "contentTypeSticky";
+  /** The request name we expect. */
+  private final static String contentTypeStickyRequestName = "contentTypeSticky";
 
   /** If true we set the content type from the contentType here.
    * Otherwise we set it according to the real type.
@@ -86,29 +87,29 @@ public class PresentationState implements Logged, Serializable {
   private boolean contentTypeSticky;
 
   /** The requet name we expect. */
-  private String contentNameRequestName = "contentName";
+  private final static String contentNameRequestName = "contentName";
 
   /** One shot content name.
    */
   private String contentName;
 
   /** The requet name we expect. */
-  private String skinNameRequestName = "skinName";
+  private final static String skinNameRequestName = "skinName";
 
   /** This should probably be a user and/or application attribute of some kind
    */
   private String skinName = "default";
 
   /** The requet name we expect. */
-  private String skinNameStickyRequestName = "skinNameSticky";
+  private final static String skinNameStickyRequestName = "skinNameSticky";
 
   /** If true we set the skin-name from the skinName here.
    */
   private boolean skinNameSticky;
 
-  /** Refresh xslt will be determined by the calue of this parameter
+  /** Refresh xslt will be determined by the value of this parameter
    */
-  private String refreshXSLTRequestName = "refreshXslt";
+  private final static String refreshXSLTRequestName = "refreshXslt";
 
   /** true to force one shot refresh
    */
@@ -119,30 +120,36 @@ public class PresentationState implements Logged, Serializable {
   private boolean forceXSLTRefreshAlways = false;
 
   /** The requet name we expect. */
-  private String noXSLTRequestName = "noxslt";
+  private final static String noXSLTRequestName = "noxslt";
 
   /** true to force one shot no xslt
    */
   private boolean noXSLT = false;
 
   /** The requet name we expect. */
-  private String noXSLTStickyRequestName = "noxsltSticky";
+  private final static String noXSLTStickyRequestName = "noxsltSticky";
 
   /** true to force no xslt
    */
   private boolean noXSLTSticky = false;
 
-  /* ====================================================================
-             Properties methods
-     ==================================================================== */
+  public PresentationState reinit(final HttpServletRequest request) {
+    /* First set default browser type from user-agent */
+    setBrowserType(HttpServletUtils.getBrowserType(request));
 
-  /** Set the name
-   *
-   * @param val   String request name
-   */
-  public void setAppRootRequestName(final String val) {
-    appRootRequestName = val;
+    checkBrowserType(request);
+    checkContentType(request);
+    checkContentName(request);
+    checkNoXSLT(request);
+    checkRefreshXslt(request);
+    checkSkinName(request);
+
+    return this;
   }
+
+  /* ========================================================
+             Properties methods
+     ======================================================== */
 
   /** get the name
    *
@@ -180,17 +187,9 @@ public class PresentationState implements Logged, Serializable {
     return browserResourceRoot;
   }
 
-  /* ====================================================================
+  /* ========================================================
              Browser type methods
-     ==================================================================== */
-
-  /** Set the name
-   *
-   * @param val   String request name
-   */
-  public void setBrowserTypeRequestName(final String val) {
-    browserTypeRequestName = val;
-  }
+     ======================================================== */
 
   /** get the name
    *
@@ -214,12 +213,11 @@ public class PresentationState implements Logged, Serializable {
     return browserType;
   }
 
-  /** Set the name
-   *
-   * @param val   String request name
+  /**
+   * @param val
    */
-  public void setBrowserTypeStickyRequestName(final String val) {
-    browserTypeStickyRequestName = val;
+  public void setBrowserTypeSticky(final boolean val) {
+    browserTypeSticky = val;
   }
 
   /** get the name
@@ -228,13 +226,6 @@ public class PresentationState implements Logged, Serializable {
    */
   public String getBrowserTypeStickyRequestName() {
     return browserTypeStickyRequestName;
-  }
-
-  /**
-   * @param val
-   */
-  public void setBrowserTypeSticky(final boolean val) {
-    browserTypeSticky = val;
   }
 
   /**
@@ -273,17 +264,9 @@ public class PresentationState implements Logged, Serializable {
     }
   }
 
-  /* ====================================================================
+  /* ========================================================
              Content type methods
-     ==================================================================== */
-
-  /** Set the name
-   *
-   * @param val   String request name
-   */
-  public void setContentTypeRequestName(final String val) {
-    contentTypeRequestName = val;
-  }
+     ======================================================== */
 
   /** get the name
    *
@@ -294,7 +277,7 @@ public class PresentationState implements Logged, Serializable {
   }
 
   /**
-   * @param val
+   * @param val explicit value
    */
   public void setContentType(final String val) {
     contentType = val;
@@ -305,14 +288,6 @@ public class PresentationState implements Logged, Serializable {
    */
   public String getContentType() {
     return contentType;
-  }
-
-  /** Set the name
-   *
-   * @param val   String request name
-   */
-  public void setContentTypeStickyRequestName(final String val) {
-    contentTypeStickyRequestName = val;
   }
 
   /** get the name
@@ -345,13 +320,10 @@ public class PresentationState implements Logged, Serializable {
     String reqpar = request.getParameter(getContentTypeRequestName());
 
     if (reqpar != null) {
-      if (reqpar.equals("!")) {
-        // Go back to unsticky content type
-        setContentTypeSticky(false);
-      } else {
+      if (!reqpar.equals("!")) {
         setContentType(reqpar);
-        setContentTypeSticky(false);
       }
+      setContentTypeSticky(false);
     }
 
     reqpar = request.getParameter(getContentTypeStickyRequestName());
@@ -366,17 +338,9 @@ public class PresentationState implements Logged, Serializable {
     }
   }
 
-  /* ====================================================================
+  /* ========================================================
              Content name methods
-     ==================================================================== */
-
-  /** Set the name
-   *
-   * @param val   String request name
-   */
-  public void setContentNameRequestName(final String val) {
-    contentNameRequestName = val;
-  }
+     ======================================================== */
 
   /** get the name
    *
@@ -411,17 +375,9 @@ public class PresentationState implements Logged, Serializable {
     setContentName(reqpar);
   }
 
-  /* ====================================================================
+  /* ==============================================================
              Skin name methods
-     ==================================================================== */
-
-  /** Set the name
-   *
-   * @param val   String request name
-   */
-  public void setSkinNameRequestName(final String val) {
-    skinNameRequestName = val;
-  }
+     ============================================================== */
 
   /** get the name
    *
@@ -443,14 +399,6 @@ public class PresentationState implements Logged, Serializable {
    */
   public String getSkinName() {
     return skinName;
-  }
-
-  /** Set the name
-   *
-   * @param val   String request name
-   */
-  public void setSkinNameStickyRequestName(final String val) {
-    skinNameStickyRequestName = val;
   }
 
   /** get the name
@@ -504,17 +452,9 @@ public class PresentationState implements Logged, Serializable {
     }
   }
 
-  /* ====================================================================
+  /* ========================================================
              Refresh XSLT methods
-     ==================================================================== */
-
-  /** Set the name of refreshXslt request parameter
-   *
-   * @param val   String request name
-   */
-  public void setRefreshXSLTRequestName(final String val) {
-    refreshXSLTRequestName = val;
-  }
+     ======================================================== */
 
   /** get the name
    *
@@ -578,17 +518,9 @@ public class PresentationState implements Logged, Serializable {
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
              No xslt methods
-     ==================================================================== */
-
-  /** Set the name
-   *
-   * @param val   String request name
-   */
-  public void setNoXSLTRequestName(final String val) {
-    noXSLTRequestName = val;
-  }
+     ============================================================= */
 
   /** get the name
    *
@@ -610,14 +542,6 @@ public class PresentationState implements Logged, Serializable {
    */
   public boolean getNoXSLT() {
     return noXSLT;
-  }
-
-  /** Set the name
-   *
-   * @param val   String request name
-   */
-  public void setNoXSLTStickyRequestName(final String val) {
-    noXSLTStickyRequestName = val;
   }
 
   /** get the name

@@ -18,8 +18,6 @@
 */
 package org.bedework.util.servlet.filters;
 
-import org.bedework.util.servlet.HttpServletUtils;
-
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -77,43 +75,35 @@ public class SelfConfiguredXSLTFilter extends ConfiguredXSLTFilter {
     super();
   }
 
-  /* (non-Javadoc)
-   * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
-   */
-  public void init(FilterConfig config) throws ServletException {
+  @Override
+  public void init(final FilterConfig config) throws ServletException {
     super.init(config);
 
-    String temp = config.getInitParameter("approot");
+    final String temp = config.getInitParameter("approot");
 
     if (temp == null) {
-      throw new ServletException("Missing required init parameter: approot");
+      throw new ServletException(
+              "Missing required init parameter: approot");
     }
 
     pstate = new PresentationState();
     pstate.setAppRoot(temp);
 
-    temp = config.getInitParameter("noxslt");
-    pstate.setNoXSLTSticky("yes".equals(temp));
+    pstate.setNoXSLTSticky(
+            "yes".equals(config.getInitParameter("noxslt")));
   }
 
-  public void updateConfigInfo(HttpServletRequest request,
-                               ConfiguredXSLTFilter.XSLTConfig xcfg)
+  @Override
+  public void updateConfigInfo(final HttpServletRequest request,
+                               final ConfiguredXSLTFilter.XSLTConfig xcfg)
                                      throws ServletException {
-    PresentationState pstate = getPresentationState(request);
+    final PresentationState pstate = getPresentationState(request);
     if (pstate == null) {
       // Still can't do a thing
       return;
     }
 
-    /* First set default browser type from user-agent */
-    pstate.setBrowserType(HttpServletUtils.getBrowserType(request));
-
-    pstate.checkBrowserType(request);
-    pstate.checkContentType(request);
-    pstate.checkContentName(request);
-    pstate.checkNoXSLT(request);
-    pstate.checkRefreshXslt(request);
-    pstate.checkSkinName(request);
+    pstate.reinit(request);
 
     super.updateConfigInfo(request, xcfg);
   }
