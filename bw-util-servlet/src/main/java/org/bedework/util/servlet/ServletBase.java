@@ -55,7 +55,7 @@ public abstract class ServletBase extends HttpServlet
 
   /** Table of methods - set at init
    */
-  protected HashMap<String, MethodInfo> methods = new HashMap<String, MethodInfo>();
+  protected HashMap<String, MethodInfo> methods = new HashMap<>();
 
   /* Try to serialize requests from a single session
    * This is very imperfect.
@@ -65,7 +65,7 @@ public abstract class ServletBase extends HttpServlet
     int waiting;
   }
 
-  private static volatile HashMap<String, Waiter> waiters = new HashMap<String, Waiter>();
+  private static volatile HashMap<String, Waiter> waiters = new HashMap<>();
 
   @Override
   public void init(final ServletConfig config) throws ServletException {
@@ -114,36 +114,38 @@ public abstract class ServletBase extends HttpServlet
       if (method == null) {
         info("No method for '" + methodName + "'");
 
-        // ================================================================
+        // ========================================================
         //     Set the correct response
-        // ================================================================
+        // ========================================================
       } else {
-        method.doMethod(req, resp);
+        if (method.beforeMethod(req, resp)) {
+          method.doMethod(req, resp);
+        }
       }
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       serverError = handleException(t, resp, serverError);
     } finally {
       try {
         tryWait(req, false);
-      } catch (Throwable t) {}
+      } catch (final Throwable ignored) {}
 
       if (debug() && dumpContent &&
               (resp instanceof CharArrayWrappedResponse)) {
         /* instanceof check because we might get a subsequent exception before
          * we wrap the response
          */
-        CharArrayWrappedResponse wresp = (CharArrayWrappedResponse)resp;
+        final CharArrayWrappedResponse wresp = (CharArrayWrappedResponse)resp;
 
         if (wresp.getUsedOutputStream()) {
           debug("------------------------ response written to output stream -------------------");
         } else {
-          String str = wresp.toString();
+          final String str = wresp.toString();
 
           debug("------------------------ Dump of response -------------------");
           debug(str);
           debug("---------------------- End dump of response -----------------");
 
-          byte[] bs = str.getBytes();
+          final byte[] bs = str.getBytes();
           resp = (HttpServletResponse)wresp.getResponse();
           debug("contentLength=" + bs.length);
           resp.setContentLength(bs.length);
@@ -153,11 +155,11 @@ public abstract class ServletBase extends HttpServlet
 
       /* WebDAV is stateless - toss away the session */
       try {
-        HttpSession sess = req.getSession(false);
+        final HttpSession sess = req.getSession(false);
         if (sess != null) {
           sess.invalidate();
         }
-      } catch (Throwable t) {}
+      } catch (final Throwable ignored) {}
     }
   }
 
@@ -173,7 +175,7 @@ public abstract class ServletBase extends HttpServlet
       error(t);
       sendError(t, resp);
       return true;
-    } catch (Throwable t1) {
+    } catch (final Throwable t1) {
       // Pretty much screwed if we get here
       return true;
     }
@@ -187,7 +189,7 @@ public abstract class ServletBase extends HttpServlet
       }
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                      t.getMessage());
-    } catch (Throwable t1) {
+    } catch (final Throwable ignored) {
       // Pretty much screwed if we get here
     }
   }
@@ -196,7 +198,7 @@ public abstract class ServletBase extends HttpServlet
                             final String extra,
                             final Writer wtr) {
     try {
-      XmlEmit xml = new XmlEmit();
+      final XmlEmit xml = new XmlEmit();
 //      syncher.addNamespace(xml);
 
       xml.startEmit(wtr);
@@ -208,7 +210,7 @@ public abstract class ServletBase extends HttpServlet
       xml.flush();
 
       return true;
-    } catch (Throwable t1) {
+    } catch (final Throwable t1) {
       // Pretty much screwed if we get here
       return false;
     }
@@ -229,12 +231,12 @@ public abstract class ServletBase extends HttpServlet
                                          boolean dumpContent) throws ServletException;
 
   /**
-   * @param name
+   * @param name of method
    * @return method
-   * @throws Exception
+   * @throws ServletException on error initialising or locating
    */
-  public MethodBase getMethod(final String name) throws Exception {
-    MethodInfo mi = methods.get(name.toUpperCase());
+  public MethodBase getMethod(final String name) throws ServletException {
+    final MethodInfo mi = methods.get(name.toUpperCase());
 
 //    if ((mi == null) || (getAnonymous() && mi.getRequiresAuth())) {
     //    return null;
@@ -250,7 +252,7 @@ public abstract class ServletBase extends HttpServlet
       if (debug()) {
         error(t);
       }
-      throw new Exception(t);
+      throw new ServletException(t);
     }
   }
 
@@ -259,7 +261,7 @@ public abstract class ServletBase extends HttpServlet
     Waiter wtr = null;
     synchronized (waiters) {
       //String key = req.getRequestedSessionId();
-      String key = req.getRemoteUser();
+      final String key = req.getRemoteUser();
       if (key == null) {
         return;
       }
@@ -303,8 +305,8 @@ public abstract class ServletBase extends HttpServlet
 
   @Override
   public void sessionDestroyed(final HttpSessionEvent se) {
-    HttpSession session = se.getSession();
-    String sessid = session.getId();
+    final HttpSession session = se.getSession();
+    final String sessid = session.getId();
     if (sessid == null) {
       return;
     }
@@ -316,23 +318,21 @@ public abstract class ServletBase extends HttpServlet
 
   /** Debug
    *
-   * @param req
+   * @param req http request
    */
   public void dumpRequest(final HttpServletRequest req) {
     try {
-      Enumeration names = req.getHeaderNames();
+      final Enumeration<String> hnames = req.getHeaderNames();
 
       String title = "Request headers";
 
       debug(title);
 
-      while (names.hasMoreElements()) {
-        String key = (String)names.nextElement();
-        String val = req.getHeader(key);
+      while (hnames.hasMoreElements()) {
+        final String key = hnames.nextElement();
+        final String val = req.getHeader(key);
         debug("  " + key + " = \"" + val + "\"");
       }
-
-      names = req.getParameterNames();
 
       title = "Request parameters";
 
@@ -350,16 +350,18 @@ public abstract class ServletBase extends HttpServlet
 
       debug(title);
 
-      while (names.hasMoreElements()) {
-        String key = (String)names.nextElement();
-        String val = req.getParameter(key);
+      final Enumeration<String> pnames = req.getParameterNames();
+
+      while (pnames.hasMoreElements()) {
+        final String key = pnames.nextElement();
+        final String val = req.getParameter(key);
         debug("  " + key + " = \"" + val + "\"");
       }
-    } catch (Throwable t) {
+    } catch (final Throwable ignored) {
     }
   }
 
-  /* -----------------------------------------------------------------------
+  /* ---------------------------------------------------------------
    *                         JMX support
    */
 

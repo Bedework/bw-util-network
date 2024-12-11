@@ -19,19 +19,18 @@
 package org.bedework.util.servlet;
 
 import org.bedework.util.logging.Logged;
+import org.bedework.util.misc.Util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -41,10 +40,11 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class MethodBase implements Logged {
   protected boolean dumpContent;
+  protected ReqUtil rutil;
 
   /** Called at each request
    *
-   * @throws ServletException
+   * @throws ServletException on fatal error
    */
   public abstract void init() throws ServletException;
 
@@ -57,10 +57,24 @@ public abstract class MethodBase implements Logged {
    */
   public abstract ObjectMapper getMapper();
 
+
+  /** May be overridden but call super(...).
+   *
+   * @param req the request
+   * @param resp and response
+   * @return true to continue - false - don't call doMethod
+   */
+  public boolean beforeMethod(final HttpServletRequest req,
+                              final HttpServletResponse resp) {
+    rutil = new ReqUtil(req, resp);
+
+    return true;
+  }
+
   /**
    * @param req the request
    * @param resp and response
-   * @throws ServletException
+   * @throws ServletException on fatal error
    */
   public abstract void doMethod(HttpServletRequest req,
                                 HttpServletResponse resp)
@@ -140,8 +154,8 @@ public abstract class MethodBase implements Logged {
     resp.setStatus(HttpServletResponse.SC_OK);
   }
 
-  protected void writeJson(final Object o,
-                           final HttpServletResponse resp) throws ServletException {
+  protected void writeJson(final HttpServletResponse resp,
+                           final Object o) throws ServletException {
     if (o == null) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       return;
@@ -166,88 +180,22 @@ public abstract class MethodBase implements Logged {
    *
    * @param req      Servlet request object
    * @return List    Path elements of fixed up uri
-   * @throws ServletException
+   * @throws ServletException on bad uri
    */
   public List<String> getResourceUri(final HttpServletRequest req)
           throws ServletException {
     String uri = req.getServletPath();
 
-    if ((uri == null) || (uri.length() == 0)) {
+    if ((uri == null) || (uri.isEmpty())) {
       /* No path specified - set it to root. */
       uri = "/";
     }
 
-    return fixPath(uri);
-  }
-
-  /** Return a path, broken into its elements, after "." and ".." are removed.
-   * If the parameter path attempts to go above the root we return null.
-   *
-   * Other than the backslash thing why not use URI?
-   *
-   * @param path      String path to be fixed
-   * @return String[]   fixed path broken into elements
-   * @throws ServletException
-   */
-  public static List<String> fixPath(final String path) throws ServletException {
-    if (path == null) {
-      return null;
-    }
-
-    String decoded;
     try {
-      decoded = URLDecoder.decode(path, "UTF8");
-    } catch (Throwable t) {
-      throw new ServletException("bad path: " + path);
+      return Util.fixPath(uri);
+    } catch (final RuntimeException re) {
+      throw new ServletException(re);
     }
-
-    if (decoded == null) {
-      return (null);
-    }
-
-    /** Make any backslashes into forward slashes.
-     */
-    if (decoded.indexOf('\\') >= 0) {
-      decoded = decoded.replace('\\', '/');
-    }
-
-    /** Ensure a leading '/'
-     */
-    if (!decoded.startsWith("/")) {
-      decoded = "/" + decoded;
-    }
-
-    /** Remove all instances of '//'.
-     */
-    while (decoded.contains("//")) {
-      decoded = decoded.replaceAll("//", "/");
-    }
-
-    /** Somewhere we may have /./ or /../
-     */
-
-    final StringTokenizer st = new StringTokenizer(decoded, "/");
-
-    ArrayList<String> al = new ArrayList<String>();
-    while (st.hasMoreTokens()) {
-      String s = st.nextToken();
-
-      if (s.equals(".")) {
-        // ignore
-      } else if (s.equals("..")) {
-        // Back up 1
-        if (al.size() == 0) {
-          // back too far
-          return null;
-        }
-
-        al.remove(al.size() - 1);
-      } else {
-        al.add(s);
-      }
-    }
-
-    return al;
   }
 
   /*
@@ -267,7 +215,7 @@ public abstract class MethodBase implements Logged {
   }
   */
 
-  protected void addHeaders(final HttpServletResponse resp) throws ServletException {
+  protected void addHeaders(final HttpServletResponse resp) {
     // This probably needs changes
 /*
     StringBuilder methods = new StringBuilder();
@@ -293,7 +241,7 @@ public abstract class MethodBase implements Logged {
    * @exception ServletException Some error occurred.
    */
   protected Object readJson(final InputStream is,
-                            final Class cl,
+                            final Class<?> cl,
                             final HttpServletResponse resp) throws ServletException {
     if (is == null) {
       return null;
@@ -301,7 +249,7 @@ public abstract class MethodBase implements Logged {
 
     try {
       return getMapper().readValue(is, cl);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       if (debug()) {
         error(t);
@@ -319,7 +267,7 @@ public abstract class MethodBase implements Logged {
    * @exception ServletException Some error occurred.
    */
   protected Object readJson(final InputStream is,
-                            final TypeReference tr,
+                            final TypeReference<?> tr,
                             final HttpServletResponse resp) throws ServletException {
     if (is == null) {
       return null;
@@ -382,6 +330,31 @@ public abstract class MethodBase implements Logged {
       os.close();
     } catch (final Throwable ignored) {
       // Pretty much screwed if we get here
+    }
+  }
+
+  public void outputJson(final HttpServletResponse resp,
+                         final String etag,
+                         final String[] header,
+                         final Object val)
+          throws ServletException {
+    resp.setStatus(HttpServletResponse.SC_OK);
+
+    if (etag != null) {
+      resp.setHeader("etag", etag);
+    }
+
+    if (header != null) {
+      resp.setHeader(header[0], header[1]);
+    }
+
+    resp.setContentType("application/json; charset=UTF-8");
+
+    writeJson(resp, val);
+    try {
+      resp.getWriter().close();
+    } catch (final IOException ioe) {
+      throw new ServletException(ioe);
     }
   }
 
