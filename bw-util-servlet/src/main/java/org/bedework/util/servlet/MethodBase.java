@@ -30,7 +30,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +43,15 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class MethodBase implements Logged {
   protected boolean dumpContent;
   protected ReqUtil rutil;
+
+  private static final Map<String,
+          Class<? extends MethodHelper>> helpers = new HashMap<>();
+
+  public static void registerHelper(
+          final String name,
+          final Class<? extends MethodHelper> helperClass) {
+    helpers.put(name, helperClass);
+  }
 
   /** Called at each request
    *
@@ -57,6 +68,9 @@ public abstract class MethodBase implements Logged {
    */
   public abstract ObjectMapper getMapper();
 
+  public ReqUtil getReqUtil() {
+    return rutil;
+  }
 
   /** May be overridden but call super(...).
    *
@@ -69,6 +83,25 @@ public abstract class MethodBase implements Logged {
     rutil = new ReqUtil(req, resp);
 
     return true;
+  }
+
+  public MethodHelper getMethodHelper(final String name) {
+    final var mclass = helpers.get(name);
+    if (mclass == null) {
+      return null;
+    }
+
+    final var helper = (MethodHelper)loadInstance(mclass);
+    if (helper == null) {
+      warn("No helper for name " + name);
+      return null;
+    }
+
+    return helper;
+  }
+
+  protected Object loadInstance(final Class<?> cl) {
+    return Util.getObject(cl.getName(), cl);
   }
 
   /**
@@ -284,8 +317,8 @@ public abstract class MethodBase implements Logged {
     }
   }
 
-  protected void sendJsonError(final HttpServletResponse resp,
-                               final String msg) {
+  public void sendJsonError(final HttpServletResponse resp,
+                            final String msg) {
     try {
       resp.setStatus(HttpServletResponse.SC_OK);
       resp.setContentType("application/json; charset=UTF-8");
