@@ -18,6 +18,7 @@
 */
 package org.bedework.util.servlet;
 
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.Util;
 
@@ -34,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 /** Base class for servlet methods.
  */
 public abstract class MethodBase implements Logged {
+  protected ServletContext context;
   protected boolean dumpContent;
   protected ReqUtil rutil;
 
@@ -55,9 +59,12 @@ public abstract class MethodBase implements Logged {
 
   /** Called at each request
    *
-   * @throws ServletException on fatal error
    */
-  public abstract void init() throws ServletException;
+  public void init(final ServletContext context,
+                            final boolean dumpContent) {
+    this.context = context;
+    this.dumpContent = dumpContent;
+  }
 
   private final SimpleDateFormat httpDateFormatter =
           new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss ");
@@ -72,6 +79,10 @@ public abstract class MethodBase implements Logged {
     return rutil;
   }
 
+  public ServletContext getContext() {
+    return context;
+  }
+
   /** May be overridden but call super(...).
    *
    * @param req the request
@@ -80,9 +91,31 @@ public abstract class MethodBase implements Logged {
    */
   public boolean beforeMethod(final HttpServletRequest req,
                               final HttpServletResponse resp) {
-    rutil = new ReqUtil(req, resp);
+    rutil = newReqUtil(req, resp);
 
     return true;
+  }
+
+  public void forward(final String path) {
+    final RequestDispatcher dispatcher = getContext()
+            .getRequestDispatcher(path);
+    try {
+      dispatcher.forward(rutil.getRequest(),
+                         rutil.getResponse());
+    } catch (final Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  /** Override to obtain a subclass.
+   *
+   * @param req the request
+   * @param resp and response
+   * @return new object
+   */
+  public ReqUtil newReqUtil(final HttpServletRequest req,
+                            final HttpServletResponse resp) {
+    return new ReqUtil(req, resp);
   }
 
   public MethodHelper getMethodHelper(final String name) {
@@ -399,6 +432,21 @@ public abstract class MethodBase implements Logged {
     synchronized (httpDateFormatter) {
       return httpDateFormatter.format(val) + "GMT";
     }
+  }
+
+  /* ==============================================================
+   *                   Logged methods
+   * ============================================================== */
+
+  private final BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }
 

@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -228,6 +229,7 @@ public abstract class ServletBase extends HttpServlet
   
   protected abstract void initMethodBase(MethodBase mb,
                                          ConfBase conf,
+                                         ServletContext context,
                                          boolean dumpContent) throws ServletException;
 
   /**
@@ -245,7 +247,8 @@ public abstract class ServletBase extends HttpServlet
     try {
       final MethodBase mb = mi.getMethodClass().newInstance();
 
-      initMethodBase(mb, getConfigurator(), dumpContent);
+      initMethodBase(mb, getConfigurator(),
+                     getServletContext(), dumpContent);
 
       return mb;
     } catch (final Throwable t) {
