@@ -48,6 +48,15 @@ public abstract class MethodBase implements Logged {
   protected boolean dumpContent;
   protected ReqUtil rutil;
 
+  /**
+   * @param req the request
+   * @param resp and response
+   * @throws ServletException on fatal error
+   */
+  public abstract void doMethod(HttpServletRequest req,
+                                HttpServletResponse resp)
+          throws ServletException;
+
   private static final Map<String,
           Class<? extends MethodHelper>> helpers = new HashMap<>();
 
@@ -136,15 +145,6 @@ public abstract class MethodBase implements Logged {
   protected Object loadInstance(final Class<?> cl) {
     return Util.getObject(cl.getName(), cl);
   }
-
-  /**
-   * @param req the request
-   * @param resp and response
-   * @throws ServletException on fatal error
-   */
-  public abstract void doMethod(HttpServletRequest req,
-                                HttpServletResponse resp)
-          throws ServletException;
 
   /** Allow servlet to create method.
    */
