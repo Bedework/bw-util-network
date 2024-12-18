@@ -97,7 +97,7 @@ public abstract class MethodBase implements Logged {
   }
 
   public void forward(final String path) {
-    final RequestDispatcher dispatcher = getContext()
+    final RequestDispatcher dispatcher = rutil.getRequest()
             .getRequestDispatcher(path);
     try {
       dispatcher.forward(rutil.getRequest(),

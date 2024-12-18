@@ -53,6 +53,7 @@ import javax.xml.namespace.QName;
 public abstract class ServletBase extends HttpServlet
         implements Logged, HttpSessionListener, ServletContextListener {
   protected boolean dumpContent;
+  protected boolean keepSession = true;
 
   /** Table of methods - set at init
    */
@@ -73,6 +74,11 @@ public abstract class ServletBase extends HttpServlet
     super.init(config);
 
     dumpContent = "true".equals(config.getInitParameter("dumpContent"));
+
+    final var ks = config.getInitParameter("keepSession");
+    if (ks != null) {
+      keepSession = "true".equals(ks);
+    }
 
     addMethods();
   }
@@ -154,13 +160,16 @@ public abstract class ServletBase extends HttpServlet
         }
       }
 
-      /* WebDAV is stateless - toss away the session */
-      try {
-        final HttpSession sess = req.getSession(false);
-        if (sess != null) {
-          sess.invalidate();
+      if (!keepSession) {
+        /* WebDAV for example is stateless - toss away the session */
+        try {
+          final HttpSession sess = req.getSession(false);
+          if (sess != null) {
+            sess.invalidate();
+          }
+        } catch (final Throwable ignored) {
         }
-      } catch (final Throwable ignored) {}
+      }
     }
   }
 
