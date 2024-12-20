@@ -1,5 +1,7 @@
 package org.bedework.util.servlet;
 
+import org.bedework.util.logging.BwLogger;
+import org.bedework.util.logging.Logged;
 import org.bedework.util.servlet.config.HelperInfo;
 
 import java.util.List;
@@ -12,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
  * appropriate criteria, e.g. the first element in a path
  *
  */
-public abstract class MethodHelper {
+public abstract class MethodHelper implements Logged {
   private HelperInfo helperInfo;
   private MethodBase mb;
 
@@ -68,7 +70,31 @@ public abstract class MethodHelper {
     mb.sendJsonError(resp, msg);
   }
 
-    public void forward(final String path) {
-    mb.forward(path);
+  /**
+   * Forwards a request to the specified path using the associated RequestDispatcher.
+   *
+   * @param name the name or identifier used to determine the forward path
+   */
+  public void forward(final String name) {
+    final var fi = helperInfo.getForward(name);
+    if (fi == null) {
+      throw new RuntimeException("No forward for name " + name);
+    }
+    mb.forwardToPath(fi.getPath());
+  }
+
+  /* ==============================================================
+   *                   Logged methods
+   * ============================================================== */
+
+  private final BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }

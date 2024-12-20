@@ -22,6 +22,7 @@ import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.Util;
 import org.bedework.util.servlet.config.AppInfo;
+import org.bedework.util.servlet.config.HelperInfo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +49,9 @@ public abstract class MethodBase implements Logged {
   protected String methodName;
   protected ReqUtil rutil;
 
+  private AppInfo appInfo;
+  private HelperInfo helperInfo;
+
   /**
    * @param req the request
    * @param resp and response
@@ -56,8 +60,6 @@ public abstract class MethodBase implements Logged {
   public abstract void doMethod(HttpServletRequest req,
                                 HttpServletResponse resp)
           throws ServletException;
-
-  private AppInfo appInfo;
 
   /** Called at each request
    *
@@ -102,7 +104,11 @@ public abstract class MethodBase implements Logged {
     return true;
   }
 
-  public void forward(final String path) {
+  public void forwardToPath(final String path) {
+    if (debug()) {
+      debug("Forwarding to " + path);
+    }
+
     final RequestDispatcher dispatcher = rutil.getRequest()
             .getRequestDispatcher(path);
     try {
@@ -125,19 +131,19 @@ public abstract class MethodBase implements Logged {
   }
 
   public MethodHelper getMethodHelper(final String name) {
-    final var hinfo = appInfo.getHelper(methodName, name);
-    if (hinfo == null) {
+    helperInfo = appInfo.getHelper(methodName, name);
+    if (helperInfo == null) {
       return null;
     }
 
     final var helper = (MethodHelper)loadInstance(
-            hinfo.getClassName());
+            helperInfo.getClassName());
     if (helper == null) {
       warn("No helper for name " + name);
       return null;
     }
 
-    helper.init(hinfo);
+    helper.init(helperInfo);
 
     return helper;
   }

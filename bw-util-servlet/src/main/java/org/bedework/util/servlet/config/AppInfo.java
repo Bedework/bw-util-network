@@ -21,6 +21,7 @@ import java.util.Map;
  * configurations with the addMethodInfo method.
  */
 public class AppInfo {
+  private AppInfo parent;
   private String method;
 
   private List<ForwardInfo> defaultForwards = new ArrayList<>();
@@ -44,6 +45,10 @@ public class AppInfo {
 
   public AppInfo(final String method) {
     this.method = method;
+  }
+
+  public AppInfo getParent() {
+    return parent;
   }
 
   public void setMethod(final String val) {
@@ -126,11 +131,18 @@ public class AppInfo {
     helpersMap.clear();
     for (final HelperInfo hi: helpers) {
       helpersMap.put(hi.getName(), hi);
+      hi.setParent(this);
     }
 
     methodHelpersMap.clear();
     for (final AppInfo ai: methodHelpers) {
       methodHelpersMap.put(ai.getMethod(), ai);
+      ai.mapObjects(this);
     }
+  }
+
+  public void mapObjects(final AppInfo parent) {
+    this.parent = parent;
+    mapObjects();
   }
 }
