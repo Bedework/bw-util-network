@@ -21,11 +21,15 @@ package org.bedework.util.servlet;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.servlet.MethodBase.MethodInfo;
+import org.bedework.util.servlet.config.AppInfo;
 import org.bedework.util.servlet.io.CharArrayWrappedResponse;
 import org.bedework.util.xml.XmlEmit;
 import org.bedework.util.xml.tagdefs.WebdavTags;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -59,6 +63,8 @@ public abstract class ServletBase extends HttpServlet
    */
   protected HashMap<String, MethodInfo> methods = new HashMap<>();
 
+  protected AppInfo appInfo;
+
   /* Try to serialize requests from a single session
    * This is very imperfect.
    */
@@ -68,6 +74,29 @@ public abstract class ServletBase extends HttpServlet
   }
 
   private static volatile HashMap<String, Waiter> waiters = new HashMap<>();
+
+  protected void addMethod(final String methodName,
+                           final MethodInfo info) {
+    methods.put(methodName, info);
+  }
+
+  /** Add methods for this namespace
+   *
+   */
+  protected abstract void addMethods();
+
+  /** Get appInfo for this namespace
+   *
+   */
+  protected AppInfo getAppInfo() {
+    return appInfo;
+  }
+
+  protected abstract void initMethodBase(MethodBase mb,
+                                         ConfBase conf,
+                                         ServletContext context,
+                                         boolean dumpContent,
+                                         String methodName) throws ServletException;
 
   @Override
   public void init(final ServletConfig config) throws ServletException {
@@ -80,7 +109,20 @@ public abstract class ServletBase extends HttpServlet
       keepSession = "true".equals(ks);
     }
 
+    loadAppInfo();
+
     addMethods();
+  }
+
+  private void loadAppInfo() {
+    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    try (final InputStream input =
+                 classLoader.getResourceAsStream("appinfo.json")) {
+      appInfo = new ObjectMapper().readValue(input, AppInfo.class);
+      appInfo.mapObjects();
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -226,38 +268,26 @@ public abstract class ServletBase extends HttpServlet
     }
   }
 
-  protected void addMethod(final String methodName, 
-                           final MethodInfo info) {
-    methods.put(methodName, info);
-  }
-  
-  /** Add methods for this namespace
-   *
-   */
-  protected abstract void addMethods();
-  
-  protected abstract void initMethodBase(MethodBase mb,
-                                         ConfBase conf,
-                                         ServletContext context,
-                                         boolean dumpContent) throws ServletException;
-
   /**
    * @param name of method
    * @return method
    * @throws ServletException on error initialising or locating
    */
   public MethodBase getMethod(final String name) throws ServletException {
-    final MethodInfo mi = methods.get(name.toUpperCase());
+    final var mn = name.toUpperCase(); // Is this correct
+    final MethodInfo mi = methods.get(mn);
 
 //    if ((mi == null) || (getAnonymous() && mi.getRequiresAuth())) {
     //    return null;
     //}
 
     try {
-      final MethodBase mb = mi.getMethodClass().newInstance();
+      final MethodBase mb = mi.getMethodClass()
+                              .getDeclaredConstructor()
+                              .newInstance();
 
       initMethodBase(mb, getConfigurator(),
-                     getServletContext(), dumpContent);
+                     getServletContext(), dumpContent, mn);
 
       return mb;
     } catch (final Throwable t) {

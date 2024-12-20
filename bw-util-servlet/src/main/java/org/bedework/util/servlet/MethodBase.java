@@ -21,6 +21,7 @@ package org.bedework.util.servlet;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.Util;
+import org.bedework.util.servlet.config.AppInfo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,9 +32,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -46,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class MethodBase implements Logged {
   protected ServletContext context;
   protected boolean dumpContent;
+  protected String methodName;
   protected ReqUtil rutil;
 
   /**
@@ -57,22 +57,19 @@ public abstract class MethodBase implements Logged {
                                 HttpServletResponse resp)
           throws ServletException;
 
-  private static final Map<String,
-          Class<? extends MethodHelper>> helpers = new HashMap<>();
-
-  public static void registerHelper(
-          final String name,
-          final Class<? extends MethodHelper> helperClass) {
-    helpers.put(name, helperClass);
-  }
+  private AppInfo appInfo;
 
   /** Called at each request
    *
    */
   public void init(final ServletContext context,
-                            final boolean dumpContent) {
+                   final boolean dumpContent,
+                   final String methodName,
+                   final AppInfo appInfo) {
     this.context = context;
     this.dumpContent = dumpContent;
+    this.methodName = methodName;
+    this.appInfo = appInfo;
   }
 
   private final SimpleDateFormat httpDateFormatter =
@@ -128,22 +125,25 @@ public abstract class MethodBase implements Logged {
   }
 
   public MethodHelper getMethodHelper(final String name) {
-    final var mclass = helpers.get(name);
-    if (mclass == null) {
+    final var hinfo = appInfo.getHelper(methodName, name);
+    if (hinfo == null) {
       return null;
     }
 
-    final var helper = (MethodHelper)loadInstance(mclass);
+    final var helper = (MethodHelper)loadInstance(
+            hinfo.getClassName());
     if (helper == null) {
       warn("No helper for name " + name);
       return null;
     }
 
+    helper.init(hinfo);
+
     return helper;
   }
 
-  protected Object loadInstance(final Class<?> cl) {
-    return Util.getObject(cl.getName(), cl);
+  protected Object loadInstance(final String cl) {
+    return Util.getObject(cl, MethodHelper.class);
   }
 
   /** Allow servlet to create method.

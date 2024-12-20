@@ -1,5 +1,7 @@
 package org.bedework.util.servlet;
 
+import org.bedework.util.servlet.config.HelperInfo;
+
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -11,7 +13,12 @@ import javax.servlet.http.HttpServletResponse;
  *
  */
 public abstract class MethodHelper {
+  private HelperInfo helperInfo;
   private MethodBase mb;
+
+  public void init(final HelperInfo helperInfo) {
+    this.helperInfo = helperInfo;
+  }
 
   public abstract void process(List<String> resourceUri,
                                HttpServletRequest req,
