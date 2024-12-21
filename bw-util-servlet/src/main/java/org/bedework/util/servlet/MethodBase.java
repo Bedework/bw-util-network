@@ -146,13 +146,20 @@ public abstract class MethodBase implements Logged {
   public MethodHelper getMethodHelper(final String name) {
     helperInfo = appInfo.getHelper(methodName, name);
     if (helperInfo == null) {
+      if (debug()) {
+        debug("No helper for name {}", name);
+      }
       return null;
+    }
+
+    if (debug()) {
+      debug("Load helper class {}", helperInfo.getClassName());
     }
 
     final var helper = (MethodHelper)loadInstance(
             helperInfo.getClassName());
     if (helper == null) {
-      warn("No helper for name " + name);
+      warn("No helper class " + helperInfo.getClassName());
       return null;
     }
 

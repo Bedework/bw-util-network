@@ -19,6 +19,7 @@
 package org.bedework.util.servlet;
 
 import org.bedework.util.jmx.ConfBase;
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.servlet.MethodBase.MethodInfo;
 import org.bedework.util.servlet.config.AppInfo;
@@ -65,15 +66,7 @@ public abstract class ServletBase extends HttpServlet
 
   protected AppInfo appInfo;
 
-  /* Try to serialize requests from a single session
-   * This is very imperfect.
-   */
-  static class Waiter {
-    boolean active;
-    int waiting;
-  }
-
-  private static volatile HashMap<String, Waiter> waiters = new HashMap<>();
+  private SessionSerializer sessionSerializer;
 
   protected void addMethod(final String methodName,
                            final MethodInfo info) {
@@ -109,6 +102,11 @@ public abstract class ServletBase extends HttpServlet
       keepSession = "true".equals(ks);
     }
 
+    final var ser = config.getInitParameter("serializeSession");
+    if ("true".equals(ser)) {
+      sessionSerializer = new SessionSerializer();
+    }
+
     loadAppInfo();
 
     addMethods();
@@ -139,7 +137,9 @@ public abstract class ServletBase extends HttpServlet
         dumpRequest(req);
       }
 
-      tryWait(req, true);
+      if (sessionSerializer != null) {
+        sessionSerializer.tryWait(req, true);
+      }
 
       if (req.getCharacterEncoding() == null) {
         req.setCharacterEncoding("UTF-8");
@@ -174,9 +174,12 @@ public abstract class ServletBase extends HttpServlet
     } catch (final Throwable t) {
       serverError = handleException(t, resp, serverError);
     } finally {
-      try {
-        tryWait(req, false);
-      } catch (final Throwable ignored) {}
+      if (sessionSerializer != null) {
+        try {
+          sessionSerializer.tryWait(req, false);
+        } catch (final Throwable ignored) {
+        }
+      }
 
       if (debug() && dumpContent &&
               (resp instanceof CharArrayWrappedResponse)) {
@@ -298,49 +301,6 @@ public abstract class ServletBase extends HttpServlet
     }
   }
 
-  private void tryWait(final HttpServletRequest req,
-                       final boolean in) throws Throwable {
-    Waiter wtr = null;
-    synchronized (waiters) {
-      //String key = req.getRequestedSessionId();
-      final String key = req.getRemoteUser();
-      if (key == null) {
-        return;
-      }
-
-      wtr = waiters.get(key);
-      if (wtr == null) {
-        if (!in) {
-          return;
-        }
-
-        wtr = new Waiter();
-        wtr.active = true;
-        waiters.put(key, wtr);
-        return;
-      }
-    }
-
-    synchronized (wtr) {
-      if (!in) {
-        wtr.active = false;
-        wtr.notify();
-        return;
-      }
-
-      wtr.waiting++;
-      while (wtr.active) {
-        if (debug()) {
-          debug("in: waiters=" + wtr.waiting);
-        }
-
-        wtr.wait();
-      }
-      wtr.waiting--;
-      wtr.active = true;
-    }
-  }
-
   @Override
   public void sessionCreated(final HttpSessionEvent se) {
   }
@@ -353,8 +313,8 @@ public abstract class ServletBase extends HttpServlet
       return;
     }
 
-    synchronized (waiters) {
-      waiters.remove(sessid);
+    if (sessionSerializer != null) {
+      sessionSerializer.removeSession(sessid);
     }
   }
 
@@ -417,5 +377,20 @@ public abstract class ServletBase extends HttpServlet
   @Override
   public void contextDestroyed(final ServletContextEvent sce) {
     getConfigurator().stop();
+  }
+
+  /* ==============================================================
+   *                   Logged methods
+   * ============================================================== */
+
+  private final BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }
