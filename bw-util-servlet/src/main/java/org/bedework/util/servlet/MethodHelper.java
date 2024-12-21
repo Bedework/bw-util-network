@@ -80,7 +80,12 @@ public abstract class MethodHelper implements Logged {
     if (fi == null) {
       throw new RuntimeException("No forward for name " + name);
     }
-    mb.forwardToPath(fi.getPath());
+
+    if (fi.isRedirect()) {
+      mb.redirectTo(fi.getPath());
+    } else {
+      mb.forwardToPath(fi.getPath());
+    }
   }
 
   /* ==============================================================

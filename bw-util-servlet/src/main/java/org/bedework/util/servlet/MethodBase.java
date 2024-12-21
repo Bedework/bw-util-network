@@ -119,6 +119,19 @@ public abstract class MethodBase implements Logged {
     }
   }
 
+  public void redirectTo(final String path) {
+    if (debug()) {
+      debug("Redirecting to " + path);
+    }
+
+    try {
+      rutil.getResponse().sendRedirect(
+              rutil.getRequest().getContextPath() + path);
+    } catch (final Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
   /** Override to obtain a subclass.
    *
    * @param req the request

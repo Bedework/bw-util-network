@@ -89,8 +89,9 @@ public class AppInfo {
   }
 
   public AppInfo addDefaultForward(final String name,
-                                  final String path) {
-    defaultForwards.add(new ForwardInfo(name, path));
+                                  final String path,
+                                   final boolean redirect) {
+    defaultForwards.add(new ForwardInfo(name, path, redirect));
 
     return this;
   }

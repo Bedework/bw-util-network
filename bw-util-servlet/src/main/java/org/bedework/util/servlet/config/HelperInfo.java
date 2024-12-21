@@ -21,8 +21,9 @@ public class HelperInfo {
   }
 
   public HelperInfo addForward(final String name,
-                               final String path) {
-    forwards.add(new ForwardInfo(name, path));
+                               final String path,
+                               final boolean redirect) {
+    forwards.add(new ForwardInfo(name, path, redirect));
 
     return this;
   }
