@@ -401,7 +401,7 @@ public abstract class MethodBase implements Logged {
     }
   }
 
-  protected void sendOkJsonData(final HttpServletResponse resp) {
+  public void sendOkJsonData(final HttpServletResponse resp) {
     final String json = "{\"status\": \"ok\"}";
 
     sendOkJsonData(resp, json);
