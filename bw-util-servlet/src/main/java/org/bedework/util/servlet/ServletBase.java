@@ -107,7 +107,10 @@ public abstract class ServletBase extends HttpServlet
       sessionSerializer = new SessionSerializer();
     }
 
-    loadAppInfo();
+    final var uai = config.getInitParameter("useAppInfo");
+    if ("true".equals(uai)) {
+      loadAppInfo();
+    }
 
     addMethods();
   }
@@ -116,6 +119,10 @@ public abstract class ServletBase extends HttpServlet
     final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     try (final InputStream input =
                  classLoader.getResourceAsStream("appinfo.json")) {
+      if (input == null) {
+        error("appinfo.json not found");
+        return;
+      }
       appInfo = new ObjectMapper().readValue(input, AppInfo.class);
       appInfo.mapObjects();
     } catch (final IOException e) {
