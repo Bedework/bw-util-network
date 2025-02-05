@@ -85,3 +85,24 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 
 #### 5.1.4
 * Sonatype failure- redo release.
+
+#### 5.1.5
+* Further changes to remove dependencies on form objects.
+
+#### 5.1.6
+* Make servlet class more generally useful. Use Util.fixPath.
+* Add features to help build web apps
+* Add new admin application. Implement (partially) 1 of the actions.
+  Add some changes to the util classes to facilitate
+* Fix ServletBase so it doesn't always invalidate session.
+  Fix the jsp likewise.
+* Refactor framework to enhance method handling.
+* Move configuration for servlet into a json file in /classes. Setup initial configuration for eventreg ws and admin.
+* Implement forwarding by name. Rearrange configs with explicit ajax error forwards and also one POST method.
+ * Centralize checking of request parameters to simplify code.
+* Added a parent to AppInfo so we can climb up to find defaults
+* Implement redirect and use for some actions.
+  Preserve the calsuite and formName in the globals across actions.
+* Refactor session serialization logic into SessionSerializer.
+* Add parameter to signify appInfo is being used
+* Move response classes and ToString into bw-base module.
