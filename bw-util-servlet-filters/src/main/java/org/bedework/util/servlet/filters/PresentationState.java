@@ -24,7 +24,7 @@ import org.bedework.util.servlet.HttpServletUtils;
 
 import java.io.Serializable;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /** This class holds the presentation state of servlet sessions.
  * We assume that we will want the same information for most of the

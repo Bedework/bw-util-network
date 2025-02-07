@@ -18,20 +18,19 @@
 */
 package org.bedework.util.servlet.filters;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.util.Enumeration;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
 
 /** This filter wraps the request and returns a wrapper to the HttpSession
  * object on calls to getSession().
@@ -87,10 +86,6 @@ public class SessionFilter implements Filter {
       return sess.getMaxInactiveInterval();
     }
 
-    public HttpSessionContext getSessionContext() {
-      return sess.getSessionContext();
-    }
-
     public Object getAttribute(String name) throws IllegalStateException {
       return sess.getAttribute(makeName(name));
     }
@@ -103,25 +98,21 @@ public class SessionFilter implements Filter {
       return sess.getAttributeNames();
     }
 
-    public String[] getValueNames() throws IllegalStateException {
-      return sess.getValueNames();
-    }
-
-    public void setAttribute(String name,
-                             Object value) throws IllegalStateException {
+    public void setAttribute(final String name,
+                             final Object value) throws IllegalStateException {
       sess.setAttribute(makeName(name), value);
     }
 
-    public void putValue(String name,
-                         Object value) throws IllegalStateException {
+    public void putValue(final String name,
+                         final Object value) throws IllegalStateException {
       sess.setAttribute(makeName(name), value);
     }
 
-    public void removeAttribute(String name) throws IllegalStateException {
+    public void removeAttribute(final String name) throws IllegalStateException {
       sess.removeAttribute(makeName(name));
     }
 
-    public void removeValue(String name) throws IllegalStateException {
+    public void removeValue(final String name) throws IllegalStateException {
       sess.removeAttribute(makeName(name));
     }
 

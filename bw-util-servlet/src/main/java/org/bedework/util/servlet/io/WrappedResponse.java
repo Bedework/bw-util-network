@@ -23,8 +23,8 @@ import org.bedework.util.logging.Logged;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 
 /** This class provides a useful form of the wrapped response.
  */

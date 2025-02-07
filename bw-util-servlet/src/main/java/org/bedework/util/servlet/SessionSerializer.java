@@ -5,7 +5,7 @@ import org.bedework.util.logging.Logged;
 
 import java.util.HashMap;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class SessionSerializer implements Logged {
   /* Try to serialize requests from a single session

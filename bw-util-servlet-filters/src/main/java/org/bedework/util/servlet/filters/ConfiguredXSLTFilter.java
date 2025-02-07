@@ -23,10 +23,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
 
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /** This filter configures the superclass according to certain dynamic or
  * application parameters. These include some or all of the following:

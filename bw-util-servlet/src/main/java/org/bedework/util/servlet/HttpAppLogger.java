@@ -20,8 +20,8 @@ package org.bedework.util.servlet;
 
 import org.bedework.util.logging.Logged;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Interface defining some logging methods for http applications.

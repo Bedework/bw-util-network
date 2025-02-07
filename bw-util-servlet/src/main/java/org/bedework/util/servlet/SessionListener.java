@@ -23,10 +23,10 @@ import org.bedework.util.logging.Logged;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionEvent;
+import jakarta.servlet.http.HttpSessionListener;
 
 /** A class to listen for session start and end. Note this may not work too
  * well in a clustered environment because the counts should be shared.

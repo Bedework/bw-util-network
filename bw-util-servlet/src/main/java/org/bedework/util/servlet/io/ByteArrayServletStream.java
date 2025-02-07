@@ -20,8 +20,8 @@ package org.bedework.util.servlet.io;
 
 import java.io.IOException;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.WriteListener;
 
 /** Useful I/O classes for filtering etc.
  *

@@ -18,9 +18,9 @@
 */
 package org.bedework.util.servlet.filters;
 
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 /** This filter configures the superclass according to initialisation
  * parameters in web.xml. It then looks for additional configuration parameters
