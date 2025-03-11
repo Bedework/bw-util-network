@@ -23,6 +23,8 @@ import org.bedework.util.logging.Logged;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+import java.io.Serializable;
+
 /**
  * Interface defining some logging methods for http applications.
  *
@@ -31,7 +33,7 @@ import jakarta.servlet.http.HttpSession;
  *
  * @author Mike Douglass  douglm@rpi.edu
  */
-public interface HttpAppLogger extends Logged {
+public interface HttpAppLogger extends Logged, Serializable {
   /**
    *
    */
