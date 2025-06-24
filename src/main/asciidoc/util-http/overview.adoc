@@ -1,0 +1,4 @@
+[[http]]
+== Util-http
+Provides utility classes to handle http interactions.
+
