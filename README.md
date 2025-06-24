@@ -11,11 +11,11 @@ This project provides a number of network (http, DAV,servlet etc) related classe
 2. Maven 3
 
 ## Using this project
-See documentation at [github pages for this project](https://bedework.github.io/bw-schemaorgforj/)
+See documentation at [github pages for this project](https://bedework.github.io/bw-network/)
 
 ## Reporting Issues
 Please report issues via the github issues tab at
-> https://github.com/Bedework/bw-schemaorgforj/issues
+> https://github.com/Bedework/bw-network/issues
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md).
