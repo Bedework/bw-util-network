@@ -2,14 +2,14 @@ name: dependency-check
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
     paths-ignore:
       - '.gitignore'
       - '*.md'
       - 'docs/**'
       - '**/*.adoc'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
     paths-ignore:
       - '.gitignore'
       - '*.md'
