@@ -9,16 +9,17 @@ This project provides a number of network (http, DAV,servlet etc) related classe
 
 1. JDK 21
 2. Maven 3
-
+`
 ## Using this project
-See documentation at [github pages for this project](https://bedework.github.io/bw-network/)
+See documentation at [github pages for this project](https://bedework.github.io/bw-util-network/)
 
 ## Reporting Issues
 Please report issues via the github issues tab at
-> https://github.com/Bedework/bw-network/issues
+> https://github.com/Bedework/bw-util-network/issues
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Security - Vulnerability reporting
 See [SECURITY.md](SECURITY.md).
+`
