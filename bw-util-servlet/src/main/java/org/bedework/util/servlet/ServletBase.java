@@ -29,12 +29,6 @@ import org.bedework.util.xml.tagdefs.WebdavTags;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
-import java.util.Enumeration;
-import java.util.HashMap;
-
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
@@ -46,6 +40,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionEvent;
 import jakarta.servlet.http.HttpSessionListener;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.util.Enumeration;
+import java.util.HashMap;
+
 import javax.xml.namespace.QName;
 
 /** WebDAV Servlet.
@@ -86,7 +87,7 @@ public abstract class ServletBase extends HttpServlet
   }
 
   protected abstract void initMethodBase(MethodBase mb,
-                                         ConfBase conf,
+                                         ConfBase<?> conf,
                                          ServletContext context,
                                          boolean dumpContent,
                                          String methodName) throws ServletException;
@@ -130,12 +131,42 @@ public abstract class ServletBase extends HttpServlet
     }
   }
 
+  /** This method differs from the superclass method in the
+   * following ways:<ul>
+   * <li> The super method only allows for the base set of
+   * methods. It does not allow for DAV methods like <b>PROPFIND</b>
+   * for example.
+   * </li>
+   * <li> This class requires method handlers to be registered,
+   * allowing for a more dynamic and configurable approach.
+   * </li>
+   * <li> This class allows the use of a session serializer
+   * which will serialize multiple incoming requests from
+   * the same source. This can help avoid issues caused by
+   * double clicks on links. Probably unnecessary on lightweight
+   * services but might help with services interacting with
+   * an ORM, for example.
+   * </li>
+   * <li>Extra debugging is provided - including dumping
+   * the content</li>
+   * <li>Supports the "X-HTTP-Method-Override" header field.
+   * This allows services to tunnel unsupported methods
+   * through firewalls. For example, some firewalls reject
+   * the <b>DAV PROPFIND</b> method. Instead, use something
+   * like <b>POST</b> and set this header to the desired
+   * method.</li>
+   * <li>Uses the configurable <b>keepSession</b> property
+   * to optionally invalidate the session on exit. Use for
+   * stateless services, for example, <b>REST</b></li>
+   * </ul>
+   * @param req the incoming http request
+   * @param resp the outgoing http response
+   * @throws IOException on any generated exception
+   */
   @Override
   protected void service(final HttpServletRequest req,
                          HttpServletResponse resp)
-          throws ServletException, IOException {
-    boolean serverError = false;
-
+          throws IOException {
     try {
       setLoggerClass(this.getClass());
 
@@ -179,7 +210,7 @@ public abstract class ServletBase extends HttpServlet
         }
       }
     } catch (final Throwable t) {
-      serverError = handleException(t, resp, serverError);
+      handleException(t, resp);
     } finally {
       if (sessionSerializer != null) {
         try {
@@ -189,11 +220,10 @@ public abstract class ServletBase extends HttpServlet
       }
 
       if (debug() && dumpContent &&
-              (resp instanceof CharArrayWrappedResponse)) {
+              (resp instanceof final CharArrayWrappedResponse wresp)) {
         /* instanceof check because we might get a subsequent exception before
          * we wrap the response
          */
-        final CharArrayWrappedResponse wresp = (CharArrayWrappedResponse)resp;
 
         if (wresp.getUsedOutputStream()) {
           debug("------------------------ response written to output stream -------------------");
@@ -225,21 +255,13 @@ public abstract class ServletBase extends HttpServlet
     }
   }
 
-  /* Return true if it's a server error */
-  private boolean handleException(final Throwable t,
-                                  final HttpServletResponse resp,
-                                  final boolean serverError) {
-    if (serverError) {
-      return true;
-    }
-
+  private void handleException(final Throwable t,
+                               final HttpServletResponse resp) {
     try {
       error(t);
       sendError(t, resp);
-      return true;
-    } catch (final Throwable t1) {
+    } catch (final Throwable ignored) {
       // Pretty much screwed if we get here
-      return true;
     }
   }
 
@@ -374,7 +396,7 @@ public abstract class ServletBase extends HttpServlet
    *                         JMX support
    */
 
-  protected abstract ConfBase getConfigurator();
+  protected abstract ConfBase<?> getConfigurator();
 
   @Override
   public void contextInitialized(final ServletContextEvent sce) {
