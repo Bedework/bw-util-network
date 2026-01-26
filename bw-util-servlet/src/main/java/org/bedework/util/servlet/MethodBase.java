@@ -27,6 +27,12 @@ import org.bedework.util.servlet.config.HelperInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,12 +40,6 @@ import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.List;
-
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 /** Base class for servlet methods.
  */
@@ -379,7 +379,7 @@ public abstract class MethodBase implements Logged {
   public void sendJsonError(final HttpServletResponse resp,
                             final String msg) {
     try {
-      resp.setStatus(HttpServletResponse.SC_OK);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       resp.setContentType("application/json; charset=UTF-8");
 
       final String json = "{\"status\": \"failed\", \"msg\": \"" + msg + "\"}";
