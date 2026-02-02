@@ -8,6 +8,8 @@ public class HelperInfo {
   private final String name;
   private final String className;
   private final List<ForwardInfo> forwards = new ArrayList<>();
+  private final List<HelperParameter> parameters =
+          new ArrayList<>();
 
   // For jackson
   public HelperInfo() {
@@ -18,14 +20,6 @@ public class HelperInfo {
                     final String className) {
     this.name = name;
     this.className = className;
-  }
-
-  public HelperInfo addForward(final String name,
-                               final String path,
-                               final boolean redirect) {
-    forwards.add(new ForwardInfo(name, path, redirect));
-
-    return this;
   }
 
   public void setParent(final AppInfo val) {
@@ -65,5 +59,33 @@ public class HelperInfo {
     }
 
     return null;
+  }
+
+  public HelperInfo addForward(final String name,
+                               final String path,
+                               final boolean redirect) {
+    forwards.add(new ForwardInfo(name, path, redirect));
+
+    return this;
+  }
+
+  public List<HelperParameter> getParameters() {
+    return parameters;
+  }
+
+  public HelperParameter getParameter(final String name) {
+    for (final var p: parameters) {
+      if (p.getName().equals(name)) {
+        return p;
+      }
+    }
+
+    return null;
+  }
+
+  public HelperInfo addParameter(final HelperParameter val) {
+    parameters.add(val);
+
+    return this;
   }
 }

@@ -104,13 +104,39 @@ public abstract class MethodBase implements Logged {
     return true;
   }
 
+  /** Return method helper defined by first element in path
+   *
+   * @param req for path info
+   * @param resp for error status
+   * @return MethodHelper
+   * @throws ServletException on error
+   */
+  public MethodHelper getMethodHelper(final HttpServletRequest req,
+                                      final HttpServletResponse resp)
+          throws ServletException {
+    final List<String> resourceUri = getResourceUri(req);
+
+    if (Util.isEmpty(resourceUri)) {
+      throw new ServletException("Bad resource url - no path specified");
+    }
+
+    final String resName = resourceUri.getFirst();
+    final var helper = getMethodHelper(resName);
+    if (helper == null) {
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return null;
+    }
+
+    return helper;
+  }
+
   public void forwardToPath(final String path) {
     if (debug()) {
       debug("Forwarding to " + path);
     }
 
     final RequestDispatcher dispatcher = rutil.getRequest()
-            .getRequestDispatcher(path);
+                                              .getRequestDispatcher(path);
     try {
       dispatcher.forward(rutil.getRequest(),
                          rutil.getResponse());
@@ -378,8 +404,16 @@ public abstract class MethodBase implements Logged {
 
   public void sendJsonError(final HttpServletResponse resp,
                             final String msg) {
+    sendJsonError(resp, msg,
+                  HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+  }
+
+  public void sendJsonError(final HttpServletResponse resp,
+                            final String msg,
+                            final int status) {
+
     try {
-      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      resp.setStatus(status);
       resp.setContentType("application/json; charset=UTF-8");
 
       final String json = "{\"status\": \"failed\", \"msg\": \"" + msg + "\"}";

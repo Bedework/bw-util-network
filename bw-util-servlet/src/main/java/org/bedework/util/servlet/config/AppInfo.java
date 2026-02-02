@@ -30,7 +30,7 @@ public class AppInfo {
 
   private List<AppInfo> methodHelpers = new ArrayList<>();
 
-  private Map<String, ForwardInfo> defaultForwardsMap =
+  private final Map<String, ForwardInfo> defaultForwardsMap =
           new HashMap<>();
 
   private final Map<String, HelperInfo> helpersMap =

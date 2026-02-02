@@ -4,11 +4,11 @@ import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.servlet.config.HelperInfo;
 
-import java.util.List;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.List;
 
 /** These can be registered with a method and located by some
  * appropriate criteria, e.g. the first element in a path
@@ -38,6 +38,10 @@ public abstract class MethodHelper implements Logged {
 
   protected MethodBase getMethodBase() {
     return mb;
+  }
+
+  public HelperInfo getHelperInfo() {
+    return helperInfo;
   }
 
   protected ReqUtil getReqUtil() {
