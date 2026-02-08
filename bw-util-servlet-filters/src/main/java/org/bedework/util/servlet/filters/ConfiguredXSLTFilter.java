@@ -18,15 +18,14 @@
 */
 package org.bedework.util.servlet.filters;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Locale;
+import org.bedework.base.exc.BedeworkException;
 
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /** This filter configures the superclass according to certain dynamic or
  * application parameters. These include some or all of the following:
@@ -42,12 +41,12 @@ import jakarta.servlet.http.HttpSession;
  * <p>The locale info is two components from the current locale. These are a
  * valid ISO Language Code, the lower-case two-letter codes as defined by
  * ISO-639. These codes can be found at a number of sites, such as
- * http://www.ics.uci.edu/pub/ietf/http/related/iso639.txt
+ * <a href="http://www.ics.uci.edu/pub/ietf/http/related/iso639.txt">...</a>
  * <p>
  * The second part is a valid ISO Country Code. These codes are the upper-case
  * two-letter codes as defined by ISO-3166. A full list of these codes can be
  * found at a number of sites, such as <br/>
- * http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html
+ * <a href="http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html">...</a>
  * <p>
  * The result is a string of the form "en_US"
  *
@@ -104,10 +103,10 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
   }
 
   /**
-   * @param req
+   * @param req http request
    * @return configuration object
    */
-  public XSLTConfig getConfig(HttpServletRequest req) {
+  public XSLTConfig getConfig(final HttpServletRequest req) {
     return (XSLTConfig)getGlobals(req);
   }
 
@@ -115,7 +114,7 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
     return new XSLTConfig();
   }
 
-  /** The path we derive from the above
+  /* The path we derive from the above
    */
 //  private String xsltPath;
 //  private boolean pathChanged;
@@ -127,10 +126,8 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
     super();
   }
 
-  /* (non-Javadoc)
-   * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
-   */
-  public void init(FilterConfig filterConfig) throws ServletException {
+  @Override
+  public void init(final FilterConfig filterConfig) throws ServletException {
     super.init(filterConfig);
 
     String dirBrowse = filterConfig.getInitParameter("directoryBrowsingDisallowed");
@@ -151,12 +148,10 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
    *
    * @param   request    Incoming HttpServletRequest object
    * @param   xcfg       XSLTConfig Our globals.
-   * @throws ServletException
    */
   public void updateConfigInfo(final HttpServletRequest request,
-                               final XSLTConfig xcfg)
-          throws ServletException {
-    PresentationState ps = getPresentationState(request);
+                               final XSLTConfig xcfg) {
+    final var ps = getPresentationState(request);
 
     if (ps == null) {
       // Still can't do a thing
@@ -172,7 +167,7 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
     xcfg.cfg.setAppRoot(ps.getAppRoot());
     xcfg.nextCfg.setAppRoot(ps.getAppRoot());
 
-    /** Transfer the state */
+    /* Transfer the state */
     if (ps.getNoXSLTSticky()) {
       xcfg.cfg.setDontFilter(true);
       xcfg.nextCfg.setDontFilter(true);
@@ -190,14 +185,14 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
 
     /* ============== Locale ================= */
 
-    Locale l = request.getLocale();
+    final var l = request.getLocale();
     String lang = l.getLanguage();
-    if ((lang == null) || (lang.length() == 0)) {
+    if (lang.isEmpty()) {
       lang = xcfg.cfg.getDefaultLang();
     }
 
     String country = l.getCountry();
-    if ((country == null) || (country.length() == 0)) {
+    if (country.isEmpty()) {
       country = xcfg.cfg.getDefaultCountry();
     }
 
@@ -251,29 +246,29 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
   /** This method can be overridden to allow a subclass to determine what the
    * final config was. It will be called after the filter has set the path
    * which may be the default.
-   *
+   * <p>
    * It will only be called if any of the config elements changed.
    *
    * @param   info       XSLTFilterConfigInfo for the next invocation.
    */
-  public void updatedConfigInfo(XSLTFilterConfigInfo info) {
+  public void updatedConfigInfo(final XSLTFilterConfigInfo info) {
   }
 
   /** Obtain the presentation state from the session. Override if you want
    * different behaviour.
    *
-   * @param request
+   * @param request http request
    * @return PresentationState
    */
   protected PresentationState getPresentationState(final HttpServletRequest request) {
-    final String attrName = PresentationState.presentationAttrName;
+    final var attrName = PresentationState.presentationAttrName;
 
     /* First try the request */
 
     Object o = request.getAttribute(attrName);
 
     if (o == null) {
-      final HttpSession sess = request.getSession(false);
+      final var sess = request.getSession(false);
 
       if (sess == null) {
         return null;
@@ -286,7 +281,7 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
       return null;
     }
 
-    PresentationState ps = (PresentationState)o;
+    final var ps = (PresentationState)o;
 
     if (debug()) {
       ps.debugDump("ConfiguredXSLTFilter");
@@ -295,9 +290,8 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
     return ps;
   }
 
-  public void doPreFilter(HttpServletRequest request)
-    throws ServletException {
-    XSLTConfig xcfg = getConfig(request);
+  public void doPreFilter(final HttpServletRequest request) {
+    final var xcfg = getConfig(request);
 
     /* Update nextCfg to reflect last time through then modify according to
        requested changes */
@@ -309,7 +303,7 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
     }
 
     if (xcfg.cfg.getAppRoot() == null) {
-      /** Either it hasn't been set - so we can't transform or it's too
+      /* Either it hasn't been set - so we can't transform or it's too
           early in the session (login etc)
        */
       if (debug()) {
@@ -353,7 +347,7 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
       return;
     }*/
 
-    /** Build the 'ideal' path, that is the concatenation of locale,
+    /* Build the 'ideal' path, that is the concatenation of locale,
      * browser and skin name. See if that combination is in the xslt table.
      *
      * If so, set that as the current path. Otherwise, discover the actual
@@ -362,27 +356,27 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
      * Then set the ideal and actual paths ready for the transform.
      */
 
-    StringBuilder idealPath = new StringBuilder(xcfg.cfg.getAppRoot());
+    final var ideal = new StringBuilder(xcfg.cfg.getAppRoot())
 
-    idealPath.append("/");
-    idealPath.append(xcfg.cfg.getLocaleInfo());
+            .append("/")
+            .append(xcfg.cfg.getLocaleInfo())
 
-    idealPath.append("/");
-    idealPath.append(xcfg.cfg.getBrowserType());
+            .append("/")
+            .append(xcfg.cfg.getBrowserType())
 
-    idealPath.append("/");
-    idealPath.append(xcfg.cfg.getSkinName());
-    idealPath.append(".xsl");
+            .append("/")
+            .append(xcfg.cfg.getSkinName())
+            .append(".xsl")
 
-    String ideal = idealPath.toString();
+            .toString();
 
     if (lookupPath(ideal) == null) {
-      /** Try to discover a valid path. We work our way down the path trying
+      /* Try to discover a valid path. We work our way down the path trying
        * first the current element then the default. There are 3 elements to
        * try, locale, browser type and skin name.
        */
 
-      StringBuilder xsltPath = new StringBuilder(xcfg.cfg.getAppRoot());
+      final var xsltPath = new StringBuilder(xcfg.cfg.getAppRoot());
 
       /* ============== Locale ================= */
 
@@ -390,7 +384,7 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
         //xcfg.cfg.setForceDefaultLocale(true);
 
         if (!tryPath(xsltPath, xcfg.cfg.getDefaultLocaleInfo(), true)) {
-          throw new ServletException("File not found: " + xsltPath);
+          throw new BedeworkException("File not found: " + xsltPath);
         }
       }
 
@@ -402,7 +396,7 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
 //        if (!tryPath(xsltPath, xcfg.cfg.getBrowserType(), true)) {
 
         if (!tryPath(xsltPath, xcfg.cfg.getDefaultBrowserType(), true)) {
-          throw new ServletException("File not found: " + xsltPath);
+          throw new BedeworkException("File not found: " + xsltPath);
         }
       }
 
@@ -412,7 +406,7 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
         //xcfg.cfg.setForceDefaultSkinName(true);
 
         if (!tryPath(xsltPath, xcfg.cfg.getDefaultSkinName() + ".xsl", false)) {
-          throw new ServletException("File not found: " + xsltPath);
+          throw new BedeworkException("File not found: " + xsltPath);
         }
       }
 
@@ -422,14 +416,14 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
     setUrl(request, ideal);
 
     try {
-      /** To get a transformer and see if everything seems OK
+      /* To get a transformer and see if everything seems OK
        */
       getXmlTransformer(getUrl(request));
       if (debug()) {
         debug("Got Transformer OK");
       }
 
-      /** Make any forced defaults stick
+      /* Make any forced defaults stick
        * /
 
       if (nextCfg.getForceDefaultBrowserType()) {
@@ -447,73 +441,13 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
 
 //      xcfg.cfg.updateFrom(xcfg.nextCfg);
 //      updatedConfigInfo(xcfg.cfg);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       error("Unable to transform document");
       error(t);
-      throw new ServletException("Could not initialize transform for " +
-                                 getUrl(request), t);
+      throw new BedeworkException("Could not initialize transform for " +
+                                 getUrl(request) + t);
     }
   }
-
-  /* * No longer valid with shared transformer tables which might get flushed.
-  This method is called to see if there is any change in the components
-   *  which make up the path. If there is none we don't need to (re)configure.
-   *  Otherwise we need to point the filter at the new xslt file.
-   *
-   * <p>We compare the working copy, nextCfg, to cfg which holds the
-   * state of the filter across calls and see if any path elements are
-   * different.
-   *
-   * <p>The elements making up the path are:<ul>
-   * <li>App root</li>
-   * <li>locale</li>
-   * <li>browser type</li>
-   * <li>skin name</li>
-   * </ul>
-   *
-   * <p>All, except the app root, may be defaulted if an explicit one does
-   * not exist. Searching for a stylesheet then becomes an excercise in
-   * trying various paths until a stylesheet is located.
-   *
-   * <p>
-   *
-   * @param  req       Incoming HttpServletRequest object
-   * @param  cfg       XSLTFilterConfigInfo object holding state
-   * @param  nextCfg   XSLTFilterConfigInfo working copy
-   * @result boolean   true if the path changed.
-   * /
-  private boolean xsltPathChanged(XSLTFilterConfigInfo cfg,
-                                  XSLTFilterConfigInfo nextCfg) {
-    if (fieldChanged(cfg.getLocaleInfo(), nextCfg.getLocaleInfo()) ||
-        fieldChanged(cfg.getBrowserType(), nextCfg.getBrowserType()) ||
-        fieldChanged(cfg.getSkinName(), nextCfg.getSkinName())) {
-      return true;
-    }
-
-    /** The path didn't change but we might be trying to force a reload
-        If so just pretend the path changed.
-     * /
-    boolean returnVal = nextCfg.getForceReload() ||
-                        nextCfg.getReloadAlways();
-    nextCfg.setForceReload(false);
-
-    return returnVal;
-  }
-
-  /* * This method is called to see if there is any change in the value
-   *
-   * @param   curVal      Current field value.
-   * @param   newVal      Possible new field value.
-   * @return  boolean     true if it changed
-   * /
-  private boolean fieldChanged(String curVal,
-                               String newVal) {
-    if (curVal == null) {
-      return true;
-    }
-
-    return !curVal.equals(newVal);
-  }*/
 
   /** Try a path and see if it exists. If so append the element
    *
@@ -522,7 +456,9 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
    * @param   dir       true if el is a directory
    * @return  boolean   true if path is OK
    */
-  private boolean tryPath(StringBuilder prefix, String el, boolean dir) {
+  private boolean tryPath(final StringBuilder prefix,
+                          final String el,
+                          final boolean dir) {
     String path = prefix + "/" + el;
 
     if (dir && directoryBrowsingDisallowed) {
@@ -534,15 +470,13 @@ public class ConfiguredXSLTFilter extends XSLTFilter {
     }
 
     try {
-      URL u = new URL(path);
+      final var u = new URL(path);
 
-      URLConnection uc = u.openConnection();
+      final var uc = u.openConnection();
 
-      if (!(uc instanceof HttpURLConnection)) {
+      if (!(uc instanceof final HttpURLConnection huc)) {
         return false;
       }
-
-      HttpURLConnection huc = (HttpURLConnection)uc;
 
       if (huc.getResponseCode() != 200) {
         return false;

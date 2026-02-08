@@ -95,8 +95,7 @@ public class SelfConfiguredXSLTFilter extends ConfiguredXSLTFilter {
 
   @Override
   public void updateConfigInfo(final HttpServletRequest request,
-                               final ConfiguredXSLTFilter.XSLTConfig xcfg)
-                                     throws ServletException {
+                               final ConfiguredXSLTFilter.XSLTConfig xcfg) {
     final PresentationState pstate = getPresentationState(request);
     if (pstate == null) {
       // Still can't do a thing

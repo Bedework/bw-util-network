@@ -25,6 +25,14 @@ import org.bedework.util.servlet.HttpServletUtils;
 import org.bedework.util.servlet.io.ByteArrayWrappedResponse;
 import org.bedework.util.servlet.io.PooledBufferedOutputStream;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,14 +42,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Properties;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -256,13 +256,13 @@ public class XSLTFilter extends AbstractFilter implements Logged {
                        final ServletResponse response,
                        final FilterChain filterChain)
          throws IOException, ServletException {
-    final HttpServletRequest hreq = (HttpServletRequest)req;
-    final HttpServletResponse resp = (HttpServletResponse)response;
+    final var hreq = (HttpServletRequest)req;
+    final var resp = (HttpServletResponse)response;
     final long startTime = System.currentTimeMillis();
 
-    final PooledBufferedOutputStream pbos = new PooledBufferedOutputStream();
+    final var pbos = new PooledBufferedOutputStream();
 
-    final WrappedResponse wrappedResp = new WrappedResponse(resp, hreq);
+    final var wrappedResp = new WrappedResponse(resp, hreq);
 
     filterChain.doFilter(req, wrappedResp);
 
@@ -280,7 +280,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
 
     /* We don't get a session till we've been through to the servlet.
      */
-    final HttpSession sess = hreq.getSession(false);
+    final var sess = hreq.getSession(false);
     final String sessId;
     if (sess == null) {
       sessId = "NONE";
@@ -392,7 +392,7 @@ public class XSLTFilter extends AbstractFilter implements Logged {
            *  is the right thing to do as only the stylesheet knows what
            *  it's producing.
            */
-          final Properties pr = xmlt.getOutputProperties();
+          final var pr = xmlt.getOutputProperties();
           if (pr != null) {
             final String encoding = pr.getProperty("encoding");
             final String mtype = pr.getProperty("media-type");
