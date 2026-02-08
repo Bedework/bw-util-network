@@ -4,13 +4,13 @@
   <parent>
     <groupId>org.bedework</groupId>
     <artifactId>bedework-parent</artifactId>
-    <version>249</version>
+    <version>251-SNAPSHOT</version>
   </parent>
 
   <packaging>pom</packaging>
 
   <artifactId>bw-util-network</artifactId>
-  <version>6.1.1-SNAPSHOT</version>
+  <version>6.2.0-SNAPSHOT</version>
   <name>Bedework: network utils</name>
   <description>Network (http, DAV,servlet etc) related utilities</description>
   <url>https://github.com/Bedework/bw-util-network</url>
@@ -51,6 +51,7 @@
     <module>bw-util-http</module>
     <module>bw-util-servlet</module>
     <module>bw-util-servlet-filters</module>
+    <module>bw-util-servlet-jsp</module>
   </modules>
 
   <build>
