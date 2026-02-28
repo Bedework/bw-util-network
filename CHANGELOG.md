@@ -2,7 +2,19 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased (6.1.0-SNAPSHOT)
+## Unreleased (6.2.0-SNAPSHOT)
+## [6.1.0] - 2026-02-25
+These changes disable the csp interceptor in struts2. 
+
+We got flooded with browser console messages like this:
+`Content-Security-Policy: (Report-Only policy) The page’s settings would block an event handler (script-src-attr) from being executed because it violates the following directive: “script-src 'nonce-bRLapbkO9tRMMygLridmc-n_' 'strict-dynamic' http: https:”. Consider using a hash ('sha256-6rROJosEzSXSQC+W4ivzwlHVxSEwISYX6qSw94QI7mk=') together with 'unsafe-hashes'.
+Source: updateUrlDisplay()`
+
+Struts2 isn't the correct place to be doing this - it probably needs to be undertow. Also the configuration is wrong. 
+
+### Added
+- struts2 module providing basic support.
+
 ### Added
 - jsp module providing basic tag support
 

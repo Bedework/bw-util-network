@@ -52,6 +52,7 @@
     <module>bw-util-servlet</module>
     <module>bw-util-servlet-filters</module>
     <module>bw-util-servlet-jsp</module>
+    <module>bw-util-struts2</module>
   </modules>
 
   <build>
